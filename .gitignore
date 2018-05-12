@@ -30,3 +30,12 @@
 *.exe
 *.out
 *.app
+
+#extras
+*.vcxproj
+.vs
+*.filters
+*.cmake
+CMakeFiles
+breakout\CMakeFiles
+*.sln
