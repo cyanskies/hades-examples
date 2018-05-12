@@ -1,0 +1,3 @@
+[submodule "hades"]
+	path = hades
+	url = https://github.com/cyanskies/hades
