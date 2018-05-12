@@ -296,6 +296,10 @@ SFML_BUILD_NETWORK:BOOL=TRUE
 // if the graphics module is built.
 SFML_BUILD_WINDOW:BOOL=TRUE
 
+//External libraries (FLAC, Freetype, Vorbis, ...) installation
+// directory
+SFML_DEPENDENCIES_INSTALL_PREFIX:PATH=.
+
 //True to generate PDB debug symbols, FALSE otherwise. Requires
 // CMake 3.1.
 SFML_GENERATE_PDB:BOOL=TRUE
@@ -303,6 +307,9 @@ SFML_GENERATE_PDB:BOOL=TRUE
 //TRUE to automatically install pkg-config files so other projects
 // can find SFML
 SFML_INSTALL_PKGCONFIG_FILES:BOOL=FALSE
+
+//Prefix installation path for miscellaneous files
+SFML_MISC_INSTALL_PREFIX:PATH=.
 
 //TRUE to use an OpenGL ES implementation, FALSE to use a desktop
 // OpenGL implementation
@@ -390,10 +397,10 @@ minizip_SOURCE_DIR:STATIC=C:/Users/cyans/Documents/GitHub/hades-examples/hades/d
 sfgui_LIB_DEPENDS:STATIC=general;sfml-audio;general;sfml-graphics;general;sfml-main;general;sfml-network;general;sfml-system;general;sfml-window;general;opengl32;
 
 //Dependencies for the target
-sfml-audio_LIB_DEPENDS:STATIC=general;sfml-system;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/openal32.lib;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/vorbisenc.lib;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/vorbisfile.lib;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/vorbis.lib;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/ogg.lib;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/flac.lib;
+sfml-audio_LIB_DEPENDS:STATIC=general;sfml-system;
 
 //Dependencies for the target
-sfml-graphics_LIB_DEPENDS:STATIC=general;sfml-window;general;sfml-system;general;opengl32;general;C:/Users/cyans/Documents/GitHub/hades-examples/hades/deps/sfml/extlibs/libs-msvc-universal/x86/freetype.lib;
+sfml-graphics_LIB_DEPENDS:STATIC=general;sfml-window;
 
 //Dependencies for target
 sfml-main_LIB_DEPENDS:STATIC=
@@ -405,7 +412,7 @@ sfml-network_LIB_DEPENDS:STATIC=general;sfml-system;general;ws2_32;
 sfml-system_LIB_DEPENDS:STATIC=general;winmm;
 
 //Dependencies for the target
-sfml-window_LIB_DEPENDS:STATIC=general;sfml-system;general;winmm;general;gdi32;general;opengl32;
+sfml-window_LIB_DEPENDS:STATIC=general;sfml-system;general;winmm;general;gdi32;
 
 //Dependencies for target
 yaml-cpp_LIB_DEPENDS:STATIC=

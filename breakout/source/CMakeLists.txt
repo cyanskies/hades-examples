@@ -1,11 +1,11 @@
 # C++ source files
 set(EX_BREAKOUT_SRC
 	main.cpp
-	include/breakout_state.hpp
+	../include/breakout_state.hpp
 )
 
 source_group("Include" FILES
-	include/breakout_state.hpp
+	../include/breakout_state.hpp
 )
 
 # Library to build

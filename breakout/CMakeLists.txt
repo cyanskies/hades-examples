@@ -22,7 +22,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON) #we use variant
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 #make visual studio debug the desired project by default
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT breakout
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT breakout)
 
 # Global preprocessor options
 #this is to ignore the thousands of warnings that
