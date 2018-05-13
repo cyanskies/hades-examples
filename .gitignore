@@ -39,3 +39,8 @@
 CMakeFiles
 breakout\CMakeFiles
 *.sln
+*.tlog
+*.log
+*.pdb
+*.user
+*.ilk

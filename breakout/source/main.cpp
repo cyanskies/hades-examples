@@ -1,5 +1,7 @@
 #include "Hades/Main.hpp"
 
+#include "input.hpp"
+
 int main(int argc, char **argv)
 {
 	return hades_main(argc, argv);
@@ -7,17 +9,15 @@ int main(int argc, char **argv)
 
 std::string_view defaultGame()
 {
-	return "ex-breakout";
+	return "breakout";
 }
 
 void resourceTypes(hades::data::data_system &data)
-{
-	//breakout_resources();
-}
+{}
 
 void hadesMain(hades::StateManager &state, hades::InputSystem &bindings, hades::CommandList &commandLine)
 {
-	//breakout_input();
+	breakout_input(bindings);
 
 	//create breakout state;
 }
