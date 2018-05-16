@@ -1,0 +1,3 @@
+top two rows are blocks
+long black block is the player paddle, with the ball next to it
+walls

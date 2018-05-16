@@ -1,5 +1,6 @@
 # C++ source files
 set(EX_BREAKOUT_SRC
+	breakout_state.cpp
 	input.cpp
 	main.cpp
 	../include/breakout_state.hpp
