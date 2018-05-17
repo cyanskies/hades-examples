@@ -22,6 +22,7 @@ public:
 	void reinit() override; 
 	void pause() override;
 	void resume() override;
+
 private:
 
 	struct game_elements;
@@ -33,13 +34,13 @@ private:
 	struct game_elements
 	{
 		//vector of blocks
-		std::vector<sf::Sprite> _blocks;
+		std::vector<sf::Sprite> blocks;
 		//vector of walls
-		std::array<sf::Sprite, 4u> _walls;
+		std::vector<sf::Sprite> walls;
 		//paddle
-		sf::Sprite _paddle;
+		sf::Sprite paddle;
 		//ball
-		sf::Sprite _ball;
+		sf::Sprite ball;
 	};
 
 	game_elements _sprites;
