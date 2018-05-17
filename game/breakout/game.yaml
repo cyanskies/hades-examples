@@ -1,0 +1,71 @@
+mod:
+    name: breakout
+
+textures:
+    sprites-tex:
+        source: sprites.png
+
+animations:
+    block-red-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [0, 0, 1.0]
+    block-blue-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [16, 0, 1.0]
+    block-orang-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [32, 0, 1.0]
+    block-green-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [0, 8, 1.0]
+    block-purpl-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [16, 8, 1.0]
+    block-white-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 16
+        height: 8
+        frames:
+            - [32, 8, 1.0]
+    paddle-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 32
+        height: 8
+        frames:
+            - [0, 16, 1.0]
+    wall-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 32
+        height: 8
+        frames:
+            - [0, 24, 1.0]
+    ball-anim:
+        duration: 1
+        texture: sprites-tex
+        width: 8
+        height: 8
+        frames:
+            - [32, 16, 1.0]

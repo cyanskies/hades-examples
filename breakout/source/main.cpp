@@ -1,5 +1,6 @@
 #include "Hades/Main.hpp"
 
+#include "breakout_state.hpp"
 #include "input.hpp"
 
 int main(int argc, char **argv)
@@ -20,4 +21,5 @@ void hadesMain(hades::StateManager &state, hades::InputSystem &bindings, hades::
 	breakout_input(bindings);
 
 	//create breakout state;
+	state.push(std::make_unique<breakout_game>());
 }

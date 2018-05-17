@@ -1,6 +1,7 @@
 #include "breakout_state.hpp"
 
 #include "Hades/Animation.hpp"
+#include "Hades/Data.hpp"
 
 constexpr auto wall_size_x = 8;
 constexpr auto wall_size_y = 8;
@@ -32,7 +33,7 @@ constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size()
 void breakout_game::init()
 {
 	const auto screen = screen_size();
-	_game_view = sf::View{ {0.f, 0.f, std::get<0>(screen), std::get<1>(screen)} };
+	_game_view = sf::View{ {0.f, 0.f, static_cast<float>(std::get<0>(screen)), static_cast<float>(std::get<1>(screen))} };
 }
 
 bool breakout_game::handleEvent(const hades::Event &)
@@ -71,9 +72,28 @@ void breakout_game::resume()
 
 std::array<const hades::resources::animation*, 10> get_block_types()
 {
-	std::array<const hades::resources::animation*, 10> out;
+	using anim = hades::resources::animation;
+	std::array<const hades::resources::animation*, 10> out{ nullptr };
 
+	const auto red_block = hades::data::GetUid("block-red-anim");
+	out[0] = hades::data::Get<anim>(red_block);
 
+	const auto blue_block = hades::data::GetUid("block-blue-anim");
+	out[1] = hades::data::Get<anim>(blue_block);
+
+	const auto orange_block = hades::data::GetUid("block-orang-anim");
+	out[2] = hades::data::Get<anim>(orange_block);
+
+	const auto green_block = hades::data::GetUid("block-green-anim");
+	out[3] = hades::data::Get<anim>(green_block);
+
+	const auto purple_block = hades::data::GetUid("block-purpl-anim");
+	out[4] = hades::data::Get<anim>(purple_block);
+
+	const auto white_block = hades::data::GetUid("block-white-anim");
+	out[5] = hades::data::Get<anim>(white_block);
+
+	return out;
 }
 
 breakout_game::game_elements breakout_game::_prepare_game() const
