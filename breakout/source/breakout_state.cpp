@@ -2,6 +2,8 @@
 
 #include "Hades/Animation.hpp"
 #include "Hades/Data.hpp"
+#include "Hades/Properties.hpp"
+#include "Hades/System.hpp"
 
 constexpr auto wall_size_x = 8;
 constexpr auto wall_size_y = 8;
@@ -30,10 +32,18 @@ constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size()
 	return { screen_x, screen_y };
 }
 
+void set_window_size()
+{
+	hades::console::SetProperty<hades::types::int32>("vid_width", screen_x);
+	hades::console::SetProperty<hades::types::int32>("vid_height", screen_y);
+
+	hades::console::RunCommand({ "vid_reinit" });
+}
+
 void breakout_game::init()
 {
-	const auto screen = screen_size();
-	_game_view = sf::View{ {0.f, 0.f, static_cast<float>(std::get<0>(screen)), static_cast<float>(std::get<1>(screen))} };
+	set_window_size();
+	_game_view = sf::View{ {0.f, 0.f, static_cast<float>(screen_x), static_cast<float>(screen_y)} };
 
 	_sprites = _prepare_game();
 }
@@ -86,7 +96,7 @@ void breakout_game::resume()
 std::array<const hades::resources::animation*, 6> get_block_types()
 {
 	using anim = hades::resources::animation;
-	std::array<const hades::resources::animation*, 6> out{ nullptr };
+	std::array<const anim*, 6> out{ nullptr };
 
 	const auto red_block = hades::data::GetUid("block-red-anim");
 	out[0] = hades::data::Get<anim>(red_block);
@@ -109,6 +119,49 @@ std::array<const hades::resources::animation*, 6> get_block_types()
 	return out;
 }
 
+std::vector<sf::Sprite> make_walls(const hades::resources::animation &wall_anim)
+{
+	std::vector<sf::Sprite> out;
+
+	const auto wall_length = wall_anim.width;
+
+	//top
+	sf::Sprite top_wall;
+	hades::animation::Apply(&wall_anim, 0.f, top_wall);
+
+	for(auto i = 0; i < screen_x; i += wall_length)
+	{
+		auto bit = top_wall;
+		bit.setPosition({ static_cast<float>(i), 0.f });
+		out.emplace_back(std::move(bit));
+	}
+
+	//left and right walls
+
+	auto left_wall = top_wall;
+	left_wall.rotate(90.f);
+	auto right_wall = top_wall;
+	right_wall.rotate(-90.f);
+
+	const auto wall_height = wall_length;
+
+	for (auto i = 0; i <= screen_y; i += wall_height)
+	{
+		auto lbit = left_wall;
+		auto rbit = right_wall;
+		
+		const auto fi = static_cast<float>(i);
+
+		lbit.setPosition({ static_cast<float>(wall_anim.height), fi });
+		out.emplace_back(std::move(lbit));
+
+		rbit.setPosition({ static_cast<float>(screen_x) - static_cast<float>(wall_anim.height), fi });
+		out.emplace_back(std::move(rbit));
+	}
+
+	return out;
+}
+
 breakout_game::game_elements breakout_game::_prepare_game() const
 {
 	game_elements e{};
@@ -119,11 +172,19 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	const auto wall_id = hades::data::GetUid("wall-anim");
 	const auto wall_anim = hades::data::Get<anim>(wall_id);
 
+	e.walls = make_walls(*wall_anim);
+
 	//create paddle
 	const auto paddle_id = hades::data::GetUid("paddle-anim");
 	const auto paddle_anim = hades::data::Get<anim>(paddle_id);
 
 	hades::animation::Apply(paddle_anim, 0.f, e.paddle);
+
+	const auto screen_xf = static_cast<float>(screen_x);
+	const auto screen_yf = static_cast<float>(screen_y);
+
+	e.paddle.setPosition({ screen_xf / 2.f - e.paddle.getLocalBounds().width / 2.f,
+		screen_yf - e.paddle.getLocalBounds().height * 2.f });
 
 	//create blocks
 	const auto rows = 10;
@@ -139,7 +200,7 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 			hades::animation::Apply(block_anim, 0.f, block);
 
 			const auto x = i * block_size_x + wall_size_x;
-			const auto y = row * block_size_y + block_size_y;
+			const auto y = row * block_size_y + block_size_y * 3;
 
 			block.setPosition({ static_cast<float>(x), static_cast<float>(y) });
 			e.blocks.emplace_back(block);
@@ -153,6 +214,11 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	const auto ball_anim = hades::data::Get<anim>(ball_id);
 
 	hades::animation::Apply(ball_anim, 0.f, e.ball);
+
+	const auto ball_start_x = screen_x - screen_x / 2;
+	const auto ball_start_y = screen_y - screen_y / 2;
+
+	e.ball.setPosition({ static_cast<float>(ball_start_x), static_cast<float>(ball_start_y) });
 
 	return e;
 }
