@@ -5,6 +5,8 @@
 #include "Hades/Properties.hpp"
 #include "Hades/System.hpp"
 
+#include "input.hpp"
+
 constexpr auto wall_size_x = 8;
 constexpr auto wall_size_y = 8;
 
@@ -36,6 +38,7 @@ void set_window_size()
 {
 	hades::console::SetProperty<hades::types::int32>("vid_width", screen_x);
 	hades::console::SetProperty<hades::types::int32>("vid_height", screen_y);
+	hades::console::SetProperty<bool>("vid_resizable", false);
 
 	hades::console::RunCommand({ "vid_reinit" });
 }
@@ -53,8 +56,21 @@ bool breakout_game::handleEvent(const hades::Event &)
 	return false;
 }
 
-void breakout_game::update(sf::Time deltaTime, const sf::RenderTarget &, hades::InputSystem::action_set)
+void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::InputSystem::action_set a)
 {
+	//apply user input
+	auto move_left = a.find(input::names[input::move_left]);
+	if (move_left != std::end(a) && move_left->active)
+	{
+		//move paddle left
+	}
+
+	auto move_right = a.find(input::names[input::move_right]);
+	if (move_right != std::end(a) && move_right->active)
+	{
+		//move paddle right
+	}
+
 	//move ball
 	//if collide with wall then invert x/y velocity depending on direction
 

@@ -20,6 +20,7 @@ void hadesMain(hades::StateManager &state, hades::InputSystem &bindings, hades::
 {
 	breakout_input(bindings);
 
-	//create breakout state;
+	set_window_size();
+
 	state.push(std::make_unique<breakout_game>());
 }

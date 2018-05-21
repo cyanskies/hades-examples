@@ -11,6 +11,8 @@
 
 constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size();
 
+void set_window_size();
+
 class breakout_game : public hades::State
 {
 public:
