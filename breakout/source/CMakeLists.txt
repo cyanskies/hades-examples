@@ -32,8 +32,3 @@ install(TARGETS ${EX_BREAKOUT_EXE}
 		RUNTIME DESTINATION bin
 		LIBRARY DESTINATION lib
 		ARCHIVE DESTINATION lib)
-
-
-# Install include directory and license files
-install(DIRECTORY include
-		DESTINATION .)

@@ -46,3 +46,4 @@ breakout\CMakeFiles
 *.ilk
 CMakeCache.txt
 dep-library
+install_manifest.txt
