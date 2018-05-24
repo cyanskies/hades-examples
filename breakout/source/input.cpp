@@ -14,6 +14,6 @@ void breakout_input(hades::InputSystem &inputsys)
 	names[move_left] = MakeUid("move_left");
 	names[move_right] = MakeUid("move_right");
 
-	inputsys.create(names[move_left], false);
-	inputsys.create(names[move_right], false);
+	inputsys.create(names[move_left], false, "left");
+	inputsys.create(names[move_right], false, "right");
 }

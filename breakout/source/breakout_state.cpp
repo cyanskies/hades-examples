@@ -29,6 +29,8 @@ constexpr auto game_bottm = screen_y;
 constexpr auto game_left = wall_size_x;
 constexpr auto game_right = screen_x - wall_size_x;
 
+constexpr auto paddle_move_speed = 5.f;
+
 constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size()
 {
 	return { screen_x, screen_y };
@@ -45,7 +47,6 @@ void set_window_size()
 
 void breakout_game::init()
 {
-	set_window_size();
 	_game_view = sf::View{ {0.f, 0.f, static_cast<float>(screen_x), static_cast<float>(screen_y)} };
 
 	_sprites = _prepare_game();
@@ -63,13 +64,22 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::InputSystem
 	if (move_left != std::end(a) && move_left->active)
 	{
 		//move paddle left
+		_sprites.paddle.move({ -paddle_move_speed, 0.f });
 	}
+
+	if (_sprites.paddle.getPosition().x < game_left)
+		_sprites.paddle.setPosition({ static_cast<float>(game_left), _sprites.paddle.getPosition().y });
 
 	auto move_right = a.find(input::names[input::move_right]);
 	if (move_right != std::end(a) && move_right->active)
 	{
 		//move paddle right
+		_sprites.paddle.move({ paddle_move_speed, 0.f });
 	}
+
+	const auto paddle_max = game_right - _sprites.paddle.getLocalBounds().width;
+	if (_sprites.paddle.getPosition().x + _sprites.paddle.getLocalBounds().width > game_right)
+		_sprites.paddle.setPosition({ static_cast<float>(paddle_max), _sprites.paddle.getPosition().y });
 
 	//move ball
 	//if collide with wall then invert x/y velocity depending on direction

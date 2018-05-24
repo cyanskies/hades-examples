@@ -45,3 +45,4 @@ breakout\CMakeFiles
 *.user
 *.ilk
 CMakeCache.txt
+dep-library
