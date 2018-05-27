@@ -17,8 +17,8 @@ class breakout_game : public hades::State
 {
 public:
 	void init() override;
-	bool handleEvent(const hades::Event&) override;
-	void update(sf::Time deltaTime, const sf::RenderTarget&, hades::InputSystem::action_set) override;
+	bool handleEvent(const hades::event&) override;
+	void update(sf::Time deltaTime, const sf::RenderTarget&, hades::input_system::action_set) override;
 	void draw(sf::RenderTarget &target, sf::Time deltaTime) override;
 
 	void reinit() override; 

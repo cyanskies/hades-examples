@@ -13,6 +13,6 @@ namespace input
 	extern std::array<input_id, names_size> names;
 }
 
-void breakout_input(hades::InputSystem& input);
+void breakout_input(hades::input_system& input);
 
 #endif // !BREAKOUT_INPUT_HPP

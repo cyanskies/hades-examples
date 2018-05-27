@@ -16,7 +16,7 @@ std::string_view defaultGame()
 void resourceTypes(hades::data::data_system &data)
 {}
 
-void hadesMain(hades::StateManager &state, hades::InputSystem &bindings, hades::CommandList &commandLine)
+void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::CommandList &commandLine)
 {
 	breakout_input(bindings);
 

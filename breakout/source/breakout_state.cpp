@@ -52,12 +52,12 @@ void breakout_game::init()
 	_sprites = _prepare_game();
 }
 
-bool breakout_game::handleEvent(const hades::Event &)
+bool breakout_game::handleEvent(const hades::event &)
 {
 	return false;
 }
 
-void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::InputSystem::action_set a)
+void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_system::action_set a)
 {
 	//apply user input
 	auto move_left = a.find(input::names[input::move_left]);
@@ -95,6 +95,7 @@ void breakout_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
 {
 	target.setView(_game_view);
 
+	LOG("drawing");
 	//draw all
 	for (const auto w : _sprites.walls)
 		target.draw(w);
