@@ -3,6 +3,7 @@
 #include "Hades/Animation.hpp"
 #include "Hades/Data.hpp"
 #include "Hades/Properties.hpp"
+#include "hades/utility.hpp"
 #include "Hades/System.hpp"
 
 #include "input.hpp"
@@ -50,11 +51,24 @@ void breakout_game::init()
 	_game_view = sf::View{ {0.f, 0.f, static_cast<float>(screen_x), static_cast<float>(screen_y)} };
 
 	_sprites = _prepare_game();
+
+	_ball_velocity.x = hades::random(-1, 1);
+	_ball_velocity.y = -1;
 }
 
 bool breakout_game::handleEvent(const hades::event &)
 {
 	return false;
+}
+
+sf::Vector2i invert_direction(sf::FloatRect intersection, sf::Vector2i velocity)
+{
+	if (intersection.width > intersection.height)
+		velocity.x *= -1;
+	else
+		velocity.y *= -1;
+
+	return velocity;
 }
 
 void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_system::action_set a)
@@ -80,11 +94,39 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_syste
 	const auto paddle_max = game_right - _sprites.paddle.getLocalBounds().width;
 	if (_sprites.paddle.getPosition().x + _sprites.paddle.getLocalBounds().width > game_right)
 		_sprites.paddle.setPosition({ static_cast<float>(paddle_max), _sprites.paddle.getPosition().y });
+	
+	//move ball	
+	const auto old_ball_pos = _sprites.ball.getPosition();
+	const auto new_ball_pos = old_ball_pos + static_cast<sf::Vector2f>(_ball_velocity);
+	const auto ball_size = _sprites.ball.getLocalBounds();
 
-	//move ball
+	const sf::FloatRect ball_bounds{ new_ball_pos, {ball_size.width, ball_size.height} };
+
+	_sprites.ball.setPosition(new_ball_pos);
 	//if collide with wall then invert x/y velocity depending on direction
 
 	//if collide with block then remove and invert velocity
+	auto &blocks = _sprites.blocks;
+	auto iter = std::begin(blocks);
+	const auto end = std::end(blocks);
+	while (iter != end)
+	{
+		const auto bounds = iter->getGlobalBounds();
+		sf::FloatRect intersection{};
+		if (bounds.intersects(ball_bounds, intersection))
+		{
+			//we got 'em boys
+			iter = blocks.erase(iter);
+			iter = end; //we only want to hit one block with a bounce
+
+			_ball_velocity = invert_direction(intersection, _ball_velocity);
+			const auto ball_pos = new_ball_pos - sf::Vector2f{ intersection.width, intersection.height };
+			_sprites.ball.setPosition(ball_pos);
+		}
+		else
+			++iter;
+	}
+
 
 	//if collide with paddle then apply apply reflect logic
 
@@ -94,8 +136,6 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_syste
 void breakout_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
 {
 	target.setView(_game_view);
-
-	LOG("drawing");
 	//draw all
 	for (const auto w : _sprites.walls)
 		target.draw(w);
