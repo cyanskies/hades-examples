@@ -1,3 +1,5 @@
+# Directory EX_BREAKOUT
+
 #version 3.10 needed for CXX_STANDARD settings
 cmake_minimum_required(VERSION 3.10)
 
@@ -12,13 +14,19 @@ if(CMAKE_CONFIGURATION_TYPES)
 	mark_as_advanced(CMAKE_CONFIGURATION_TYPES)
 endif()
 
-set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+project(collision)
 
-#add hades
-add_subdirectory(hades)
-
-add_subdirectory(breakout)
-add_subdirectory(collision)
+# https://cmake.org/cmake/help/latest/prop_tgt/CXX_STANDARD.html
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON) #we use variant
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 #make visual studio debug the desired project by default
 set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT breakout)
+
+# Global preprocessor options
+#this is to ignore the thousands of warnings that
+#yaml generates through iterator usage
+add_definitions(-D_SILENCE_CXX17_ITERATOR_BASE_CLASS_DEPRECATION_WARNING)
+
+add_subdirectory(source)
