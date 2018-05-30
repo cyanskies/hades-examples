@@ -24,6 +24,7 @@ void collision_game::init()
 	_rect.setSize({ 50.f, 50.f });
 	_rect.setFillColor(sf::Color::Black);
 
+	_circ.setOrigin({ 50.f, 50.f });
 	_circ.setPosition({ margin, h / 2 });
 	_circ.setRadius(50.f);
 	_circ.setFillColor(sf::Color::Black);
@@ -34,18 +35,17 @@ void collision_game::init()
 
 	sf::Vector2f middle{ w / 2, h / 2 };
 
+
+	_my_circ.setOrigin({ 25.f, 25.f });
 	_my_circ.setPosition(middle);
 	_my_circ.setRadius(25.f);
-	_my_circ.setFillColor(safe_col);
 
 	_my_rect.setPosition(middle);
 	_my_rect.setSize({ 50.f, 50.f });
-	_my_rect.setFillColor(safe_col);
 
 	_my_point.setPosition(middle);
 	_my_point.setSize({ 1.f, 1.f });
-	_my_point.setFillColor(safe_col);
-
+	
 	_target = { middle.x, middle.y };
 }
 
@@ -56,6 +56,9 @@ bool collision_game::handleEvent(const hades::event &)
 
 void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_system::action_set a)
 {
+	static const auto safe_col = sf::Color::Green;
+	static const auto hit_col = sf::Color::Red;
+
 	static const auto change_shape = hades::data::GetUid("change_shape");
 
 	_current += t;
@@ -65,7 +68,6 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 	{
 		_shape_change_time = _current;
 		_shape = static_cast<shapes>((_shape + 1) % max_shape);
-		LOG(hades::to_string(_shape));
 	}
 
 	static const auto mouse = hades::data::GetUid("mouse");
@@ -85,7 +87,9 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 	const auto cir_rad = _my_circ.getRadius();
 
 	const auto cir_pos_dir = _target - vector_f{ cir_pos.x, cir_pos.y };
-	const auto cir_move = hades::vector::resize(cir_pos_dir, _speed);
+	auto cir_move = hades::vector::resize(cir_pos_dir, _speed);
+	if (hades::vector::distance({ cir_pos.x, cir_pos.y }, _target) < _speed)
+		cir_move = cir_pos_dir;
 
 	const hades::circle_t<float> my_circle_cur{ cir_pos.x, cir_pos.y, cir_rad };
 	const hades::circle_t<float> my_circle_next{ cir_pos.x + cir_move.x, cir_pos.y + cir_move.y, cir_rad };
@@ -93,7 +97,7 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 	const auto[circle_circle_collide, circle_circle_fix] = hades::collision_test(my_circle_cur, my_circle_next, circle);
 	if (circle_circle_collide)
 	{
-		_my_circ.setPosition({ my_circle_next.x, my_circle_next.y });
+		_my_circ.setPosition({ my_circle_cur.x + circle_circle_fix.x, my_circle_cur.y + circle_circle_fix.y });
 		_my_circ.setFillColor(hit_col);
 	}
 	else

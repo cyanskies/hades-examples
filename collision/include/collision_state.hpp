@@ -12,7 +12,7 @@
 
 using vector_f = hades::vector_t<float>;
 
-enum shapes {point, rect, circle, max_shape};
+enum shapes {rect, circle, point, max_shape};
 
 class collision_game : public hades::State
 {
