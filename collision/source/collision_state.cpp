@@ -54,32 +54,32 @@ bool collision_game::handleEvent(const hades::event &)
 	return false;
 }
 
+template<typename T, typename U>
+std::tuple<bool, vector_f> move_object(vector_f move, T my_obj, U other)
+{
+	auto moved_obj = my_obj;
+	moved_obj.x = my_obj.x + move.x;
+	moved_obj.y = my_obj.y + move.y;
+
+	return hades::collision_test(my_obj, moved_obj, other);
+}
+
 template<typename T, typename U, typename V, typename W>
-std::tuple<T, bool> move_object(vector_f target, T o, U a, V b, W c)
+std::tuple<vector_f, bool> move_object(vector_f target, T o, U a, V b, W c)
 {
 	constexpr auto speed = 5.f;
 
 	const auto pos_dir = target - vector_f{ o.x, o.y };
-	auto cir_move = hades::vector::resize(pos_dir, speed);
-	if (hades::vector::distance({ o.x, o.y }, target) < speed)
-		cir_move = pos_dir;
+	auto move = hades::vector::resize(pos_dir, speed);
+	if (const auto dist = hades::vector::distance({ o.x, o.y }, target); dist < speed)
+		move = hades::vector::resize(pos_dir, dist);
+		
 
-	const hades::circle_t<float> my_circle_cur{ cir_pos.x, cir_pos.y, cir_rad };
-	const hades::circle_t<float> my_circle_next{ cir_pos.x + cir_move.x, cir_pos.y + cir_move.y, cir_rad };
+	const auto[collide_a, move_a] = move_object(move, o, a);
+	if (collide_a)
+		move = move_a;
 
-	const auto[circle_circle_collide, circle_circle_fix] = hades::collision_test(my_circle_cur, my_circle_next, circle);
-	if (circle_circle_collide)
-	{
-		_my_circ.setPosition({ my_circle_cur.x + circle_circle_fix.x, my_circle_cur.y + circle_circle_fix.y });
-		_my_circ.setFillColor(hit_col);
-	}
-	else
-	{
-		_my_circ.setPosition({ my_circle_next.x, my_circle_next.y });
-		_my_circ.setFillColor(safe_col);
-	}
-
-	return { o, false };
+	return { move, collide_a };
 }
 
 void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_system::action_set a)
@@ -112,9 +112,12 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 
 	//move circle
 	const hades::circle_t<float> my_circle{ _my_circ.getPosition().x, _my_circ.getPosition().y, _my_circ.getRadius() };
-
-	const auto moved_circle = move_object(_target, my_circle, circle, rect, point);
-
+	const auto [moved_circle, circle_hit] = move_object(_target, my_circle, circle, rect, point);
+	_my_circ.move(moved_circle.x, moved_circle.y);
+	if (circle_hit)
+		_my_circ.setFillColor(hit_col);
+	else
+		_my_circ.setFillColor(safe_col);
 
 	
 	//move rect

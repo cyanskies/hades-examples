@@ -33,7 +33,7 @@ private:
 
 	sf::RectangleShape _backdrop;
 
-	shapes _shape;
+	shapes _shape = circle;
 	const float _speed = 5.f;
 	vector_f _target;
 
