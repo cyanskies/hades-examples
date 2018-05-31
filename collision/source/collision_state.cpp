@@ -57,11 +57,9 @@ bool collision_game::handleEvent(const hades::event &)
 template<typename T, typename U>
 std::tuple<bool, vector_f> move_object(vector_f move, T my_obj, U other)
 {
-	auto moved_obj = my_obj;
-	moved_obj.x = my_obj.x + move.x;
-	moved_obj.y = my_obj.y + move.y;
-
-	return hades::collision_test(my_obj, moved_obj, other);
+	const auto new_move = hades::collision_move(my_obj, move, other);
+	const bool collision{ move != new_move };
+	return { collision, new_move };
 }
 
 template<typename T, typename U, typename V, typename W>
@@ -74,12 +72,15 @@ std::tuple<vector_f, bool> move_object(vector_f target, T o, U a, V b, W c)
 	if (const auto dist = hades::vector::distance({ o.x, o.y }, target); dist < speed)
 		move = hades::vector::resize(pos_dir, dist);
 		
-
 	const auto[collide_a, move_a] = move_object(move, o, a);
 	if (collide_a)
 		move = move_a;
 
-	return { move, collide_a };
+	const auto[collide_c, move_c] = move_object(move, o, c);
+	if (collide_c)
+		move = move_c;
+
+	return { move, collide_a || collide_c };
 }
 
 void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_system::action_set a)
