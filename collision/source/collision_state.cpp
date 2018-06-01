@@ -76,11 +76,15 @@ std::tuple<vector_f, bool> move_object(vector_f target, T o, U a, V b, W c)
 	if (collide_a)
 		move = move_a;
 
+	const auto[collide_b, move_b] = move_object(move, o, b);
+	if (collide_b)
+		move = move_b;
+
 	const auto[collide_c, move_c] = move_object(move, o, c);
 	if (collide_c)
 		move = move_c;
 
-	return { move, collide_a || collide_c };
+	return { move, collide_a || collide_b || collide_c };
 }
 
 void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_system::action_set a)
@@ -106,7 +110,6 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 		_target = { static_cast<float>(mouse_move->x_axis), static_cast<float>(mouse_move->y_axis) };
 
 	//static collider info
-
 	static const hades::circle_t<float> circle{_circ.getPosition().x, _circ.getPosition().y, _circ.getRadius() };
 	static const hades::rect_t<float> rect{ _rect.getPosition().x, _rect.getPosition().y, _rect.getSize().x, _rect.getSize().y };
 	static const hades::point_t<float> point{ _point.getPosition().x, _point.getPosition().y };
@@ -119,9 +122,16 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 		_my_circ.setFillColor(hit_col);
 	else
 		_my_circ.setFillColor(safe_col);
-
 	
 	//move rect
+	const auto rect_bounds = _my_rect.getGlobalBounds();
+	const hades::rect_t<float> my_rect{ rect_bounds.left, rect_bounds.top, rect_bounds.width, rect_bounds.height };
+	const auto[rect_move, rect_hit] = move_object(_target, my_rect, circle, rect, point);
+	_my_rect.move(rect_move.x, rect_move.y);
+	if (rect_hit)
+		_my_rect.setFillColor(hit_col);
+	else
+		_my_rect.setFillColor(safe_col);
 
 	//move point
 
