@@ -44,7 +44,8 @@ void collision_game::init()
 	_my_rect.setSize({ 50.f, 50.f });
 
 	_my_point.setPosition(middle);
-	_my_point.setSize({ 1.f, 1.f });
+	_my_point.setSize({ 2.f, 2.f });
+	//_my_point.setSize({ 1.f, 1.f });
 	
 	_target = { middle.x, middle.y };
 }
@@ -57,7 +58,7 @@ bool collision_game::handleEvent(const hades::event &)
 template<typename T, typename U>
 std::tuple<bool, vector_f> move_object(vector_f move, T my_obj, U other)
 {
-	const auto new_move = hades::collision_move(my_obj, move, other);
+	const auto new_move = hades::safe_move(my_obj, move, other);
 	const bool collision{ move != new_move };
 	return { collision, new_move };
 }
@@ -134,7 +135,13 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 		_my_rect.setFillColor(safe_col);
 
 	//move point
-
+	const vector_f my_point{ _my_point.getPosition().x, _my_point.getPosition().y };
+	const auto[point_move, point_hit] = move_object(_target, my_point, circle, rect, point);
+	_my_point.move(point_move.x, point_move.y);
+	if (point_hit)
+		_my_point.setFillColor(hit_col);
+	else
+		_my_point.setFillColor(safe_col);
 
 }
 
