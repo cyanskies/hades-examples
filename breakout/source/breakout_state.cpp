@@ -192,6 +192,11 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_syste
 
 	//if ball hits the bottom
 	//end
+	if (ball_bounds.y > screen_y)
+	{
+		kill();
+		this->PushStateUnder(std::make_unique<breakout_game>());
+	}
 }
 
 void breakout_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
