@@ -6,6 +6,7 @@
 
 #include "SFML/Graphics/Sprite.hpp"
 
+#include "hades/collision.hpp"
 #include "Hades/State.hpp"
 #include "Hades/types.hpp"
 #include "hades/vector_math.hpp"
@@ -31,6 +32,12 @@ private:
 	struct game_elements;
 	//places all the game elements for a new game
 	game_elements _prepare_game() const;
+
+	using collision_return = std::tuple<hades::direction, hades::vector_t<float>>;
+
+	collision_return _test_block_collision(hades::rect_t<float> ball);
+	collision_return _test_edge_collision(hades::rect_t<float> ball);
+	collision_return _test_paddle_collision(hades::rect_t<float> ball, hades::rect_t<float> paddle);
 
 	sf::View _game_view;
 
