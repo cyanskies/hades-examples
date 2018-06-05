@@ -1,6 +1,7 @@
 #include "breakout_state.hpp"
 
 #include "Hades/Animation.hpp"
+#include "hades/collision.hpp"
 #include "Hades/Data.hpp"
 #include "Hades/Properties.hpp"
 #include "hades/utility.hpp"
@@ -52,7 +53,7 @@ void breakout_game::init()
 
 	_sprites = _prepare_game();
 
-	_ball_velocity.x = hades::random(-1, 1);
+	_ball_velocity.x = static_cast<float>(hades::random(-1, 1));
 	_ball_velocity.y = -1;
 }
 
@@ -95,38 +96,63 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_syste
 	if (_sprites.paddle.getPosition().x + _sprites.paddle.getLocalBounds().width > game_right)
 		_sprites.paddle.setPosition({ static_cast<float>(paddle_max), _sprites.paddle.getPosition().y });
 	
+	//=========
 	//move ball	
-	const auto old_ball_pos = _sprites.ball.getPosition();
-	const auto new_ball_pos = old_ball_pos + static_cast<sf::Vector2f>(_ball_velocity);
-	const auto ball_size = _sprites.ball.getLocalBounds();
+	//=========
 
-	const sf::FloatRect ball_bounds{ new_ball_pos, {ball_size.width, ball_size.height} };
+	//generate ball collision data
+	const hades::rect_t<float> ball_bounds{
+		_sprites.ball.getPosition().x,
+		_sprites.ball.getPosition().y,
+		_sprites.ball.getLocalBounds().width,
+		_sprites.ball.getLocalBounds().height
+	};
 
-	_sprites.ball.setPosition(new_ball_pos);
-	//if collide with wall then invert x/y velocity depending on direction
-
-	//if collide with block then remove and invert velocity
+	//find safest move
 	auto &blocks = _sprites.blocks;
 	auto iter = std::begin(blocks);
-	const auto end = std::end(blocks);
-	while (iter != end)
+	hades::direction hit_direction{ hades::direction::last };
+	auto move = _ball_velocity;
+	while (iter != std::end(blocks))
 	{
-		const auto bounds = iter->getGlobalBounds();
-		sf::FloatRect intersection{};
-		if (bounds.intersects(ball_bounds, intersection))
-		{
-			//we got 'em boys
-			iter = blocks.erase(iter);
-			iter = end; //we only want to hit one block with a bounce
+		const auto sf_bounds = iter->getGlobalBounds();
+		const hades::rect_t<float> bounds{ sf_bounds.left, sf_bounds.top, sf_bounds.width, sf_bounds.height };
+		const auto safe_move = hades::safe_move(ball_bounds, _ball_velocity, bounds);
 
-			_ball_velocity = invert_direction(intersection, _ball_velocity);
-			const auto ball_pos = new_ball_pos - sf::Vector2f{ intersection.width, intersection.height };
-			_sprites.ball.setPosition(ball_pos);
-		}
-		else
+		if (safe_move == _ball_velocity)
 			++iter;
+		else
+		{
+			iter = blocks.erase(iter);
+
+			if (safe_move.x < move.x
+				&& safe_move.y < move.y)
+				move = safe_move;
+
+			hit_direction = hades::collision_direction(ball_bounds, _ball_velocity, bounds);
+		}
 	}
 
+	//move is now the longest safe move
+	_sprites.ball.move({ move.x, move.y });
+
+	using hades::direction;
+	//direction is the edge we hit
+	switch (hit_direction)
+	{
+	case direction::left:
+	case direction::right:
+		_ball_velocity.x *= -1.f;
+		break;
+	case direction::top:
+	case direction::bottom:
+		_ball_velocity.y *= -1.f;
+		break;
+	}
+
+	//bounce off walls
+
+	//bounce off roof
 
 	//if collide with paddle then apply apply reflect logic
 

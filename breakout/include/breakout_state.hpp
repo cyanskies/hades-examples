@@ -8,6 +8,7 @@
 
 #include "Hades/State.hpp"
 #include "Hades/types.hpp"
+#include "hades/vector_math.hpp"
 
 constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size();
 
@@ -46,7 +47,7 @@ private:
 	};
 
 	game_elements _sprites;
-	sf::Vector2i _ball_velocity;
+	hades::vector_t<float> _ball_velocity;
 };
 
 #endif
