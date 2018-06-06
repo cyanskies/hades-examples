@@ -18,6 +18,7 @@ set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 add_subdirectory(hades)
 
 add_subdirectory(breakout)
+add_subdirectory(breakout_ex)
 add_subdirectory(collision)
 
 #make visual studio debug the desired project by default
