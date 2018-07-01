@@ -17,10 +17,10 @@ hades::unique_id change_shape = hades::unique_id::zero;
 
 void resourceTypes(hades::data::data_system &data)
 {
-	change_shape = data.getUid("change_shape");
+	change_shape = data.get_uid("change_shape");
 }
 
-void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::CommandList &commandLine)
+void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::command_list &commandLine)
 {
 	hades::RegisterMouseInput(bindings);
 	bindings.create(change_shape, false, "space");

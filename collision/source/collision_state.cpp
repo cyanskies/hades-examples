@@ -11,8 +11,8 @@ const auto hit_col = sf::Color::Red;
 
 void collision_game::init()
 {
-	const auto width = hades::console::GetInt("vid_width", 800);
-	const auto height = hades::console::GetInt("vid_height", 600);
+	const auto width = hades::console::get_int("vid_width", 800);
+	const auto height = hades::console::get_int("vid_height", 600);
 
 	const auto w = static_cast<float>(width->load());
 	const auto h = static_cast<float>(height->load());
@@ -93,7 +93,7 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 	static const auto safe_col = sf::Color::Green;
 	static const auto hit_col = sf::Color::Red;
 
-	static const auto change_shape = hades::data::GetUid("change_shape");
+	static const auto change_shape = hades::data::get_uid("change_shape");
 
 	_current += t;
 
@@ -104,7 +104,7 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 		_shape = static_cast<shapes>((_shape + 1) % max_shape);
 	}
 
-	static const auto mouse = hades::data::GetUid("mouse");
+	static const auto mouse = hades::data::get_uid("mouse");
 
 	const auto mouse_move = a.find(mouse);
 	if (mouse_move->active)
@@ -163,8 +163,8 @@ void collision_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
 
 void collision_game::reinit()
 {
-	static const auto width = hades::console::GetInt("vid_width", 800);
-	static const auto height = hades::console::GetInt("vid_height", 600);
+	static const auto width = hades::console::get_int("vid_width", 800);
+	static const auto height = hades::console::get_int("vid_height", 600);
 
 	_backdrop.setSize( {static_cast<float>(width->load()), static_cast<float>(height->load())} );
 }

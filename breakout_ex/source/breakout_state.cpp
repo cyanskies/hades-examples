@@ -41,11 +41,11 @@ constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size()
 
 void set_window_size()
 {
-	hades::console::SetProperty<hades::types::int32>("vid_width", screen_x);
-	hades::console::SetProperty<hades::types::int32>("vid_height", screen_y);
-	hades::console::SetProperty<bool>("vid_resizable", false);
+	hades::console::set_property<hades::types::int32>("vid_width", screen_x);
+	hades::console::set_property<hades::types::int32>("vid_height", screen_y);
+	hades::console::set_property<bool>("vid_resizable", false);
 
-	hades::console::RunCommand({ "vid_reinit" });
+	hades::console::run_command({ "vid_reinit" });
 }
 
 void breakout_game::init()
@@ -231,23 +231,23 @@ std::array<const hades::resources::animation*, 6> get_block_types()
 	using anim = hades::resources::animation;
 	std::array<const anim*, 6> out{ nullptr };
 
-	const auto red_block = hades::data::GetUid("block-red-anim");
-	out[0] = hades::data::Get<anim>(red_block);
+	const auto red_block = hades::data::get_uid("block-red-anim");
+	out[0] = hades::data::get<anim>(red_block);
 
-	const auto blue_block = hades::data::GetUid("block-blue-anim");
-	out[1] = hades::data::Get<anim>(blue_block);
+	const auto blue_block = hades::data::get_uid("block-blue-anim");
+	out[1] = hades::data::get<anim>(blue_block);
 
-	const auto orange_block = hades::data::GetUid("block-orang-anim");
-	out[2] = hades::data::Get<anim>(orange_block);
+	const auto orange_block = hades::data::get_uid("block-orang-anim");
+	out[2] = hades::data::get<anim>(orange_block);
 
-	const auto green_block = hades::data::GetUid("block-green-anim");
-	out[3] = hades::data::Get<anim>(green_block);
+	const auto green_block = hades::data::get_uid("block-green-anim");
+	out[3] = hades::data::get<anim>(green_block);
 
-	const auto purple_block = hades::data::GetUid("block-purpl-anim");
-	out[4] = hades::data::Get<anim>(purple_block);
+	const auto purple_block = hades::data::get_uid("block-purpl-anim");
+	out[4] = hades::data::get<anim>(purple_block);
 
-	const auto white_block = hades::data::GetUid("block-white-anim");
-	out[5] = hades::data::Get<anim>(white_block);
+	const auto white_block = hades::data::get_uid("block-white-anim");
+	out[5] = hades::data::get<anim>(white_block);
 
 	return out;
 }
@@ -302,14 +302,14 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	using anim = hades::resources::animation;
 
 	//create walls
-	const auto wall_id = hades::data::GetUid("wall-anim");
-	const auto wall_anim = hades::data::Get<anim>(wall_id);
+	const auto wall_id = hades::data::get_uid("wall-anim");
+	const auto wall_anim = hades::data::get<anim>(wall_id);
 
 	e.walls = make_walls(*wall_anim);
 
 	//create paddle
-	const auto paddle_id = hades::data::GetUid("paddle-anim");
-	const auto paddle_anim = hades::data::Get<anim>(paddle_id);
+	const auto paddle_id = hades::data::get_uid("paddle-anim");
+	const auto paddle_anim = hades::data::get<anim>(paddle_id);
 
 	hades::animation::Apply(paddle_anim, 0.f, e.paddle);
 
@@ -343,8 +343,8 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	}
 
 	//create ball
-	const auto ball_id = hades::data::GetUid("ball-anim");
-	const auto ball_anim = hades::data::Get<anim>(ball_id);
+	const auto ball_id = hades::data::get_uid("ball-anim");
+	const auto ball_anim = hades::data::get<anim>(ball_id);
 
 	hades::animation::Apply(ball_anim, 0.f, e.ball);
 

@@ -69,3 +69,19 @@ animations:
         height: 8
         frames:
             - [32, 16, 1.0]
+
+objects:
+    wall:
+        editor-icon: wall-anim
+        editor-anim: wall-anim
+        curves:
+        systems:
+        client-systems:
+    block-base:
+        curves:
+        systems:
+        client-systems:
+    ball:
+        curves:
+        systems:
+        client-systems:

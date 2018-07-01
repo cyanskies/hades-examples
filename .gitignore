@@ -47,3 +47,4 @@ breakout\CMakeFiles
 CMakeCache.txt
 dep-library
 install_manifest.txt
+*.exp
