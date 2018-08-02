@@ -1,12 +1,9 @@
 # C++ source files
 set(BOUNCE_SRC
-	collision_state.cpp
 	main.cpp
-	../include/collision_state.hpp
 )
 
 source_group("Include" FILES
-	../include/collision_state.hpp
 )
 
 # Library to build
