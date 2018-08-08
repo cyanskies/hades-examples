@@ -20,6 +20,6 @@ add_subdirectory(hades)
 add_subdirectory(breakout)
 add_subdirectory(breakout_ex)
 add_subdirectory(collision)
-
+add_subdirectory(bounce)
 #make visual studio debug the desired project by default
-set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT breakout)
+set_property(DIRECTORY PROPERTY VS_STARTUP_PROJECT bounce)

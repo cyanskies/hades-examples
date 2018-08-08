@@ -1,9 +1,15 @@
 # C++ source files
 set(BOUNCE_SRC
+	bounce_state.cpp
+	bounce_systems.cpp
 	main.cpp
+	../include/bounce_state.hpp
+	../include/bounce_systems.hpp
 )
 
 source_group("Include" FILES
+	../include/bounce_state.hpp
+	../include/bounce_systems.hpp
 )
 
 # Library to build
