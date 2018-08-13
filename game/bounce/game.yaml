@@ -1,0 +1,10 @@
+mod:
+    name: bounce
+
+editor:
+    grid-shrink-icon: grid-shrink
+    grid-grow-icon: grid-grow
+    grid-show-icon: grid-show
+
+objects:
+    test-obj:
