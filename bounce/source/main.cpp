@@ -36,5 +36,5 @@ void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades:
 	if (editor)
 		state.push(std::make_unique<objects::object_editor>());
 	else
-		;//push bounce state
+		state.push(std::make_unique<bounce_state>());
 }
