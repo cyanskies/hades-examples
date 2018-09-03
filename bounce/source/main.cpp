@@ -20,8 +20,8 @@ std::string_view defaultGame()
 void resourceTypes(hades::data::data_system &data)
 {
 	objects::RegisterObjectResources(&data);
-	
-	//add bounce systems
+
+	register_bounce_systems(data);
 }
 
 void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::command_list &commandLine)

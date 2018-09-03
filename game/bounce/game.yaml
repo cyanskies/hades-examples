@@ -8,3 +8,7 @@ editor:
 
 objects:
     test-obj:
+        curves:
+            -position
+            -size
+        systems: [nothing_system]
