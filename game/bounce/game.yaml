@@ -9,6 +9,6 @@ editor:
 objects:
     test-obj:
         curves:
-            -position
-            -size
+            - [position, [1, 2] ]
+            - [size, [1, 2] ]
         systems: [nothing_system]
