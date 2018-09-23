@@ -21,8 +21,9 @@ bool bounce_state::handleEvent(const hades::event &)
 	return false;
 }
 
-void bounce_state::update(sf::Time deltaTime, const sf::RenderTarget &, hades::input_system::action_set)
+void bounce_state::update(sf::Time deltaTime, const sf::RenderTarget&, hades::input_system::action_set)
 {
+	_server->update(deltaTime);
 }
 
 void bounce_state::draw(sf::RenderTarget & target, sf::Time deltaTime)

@@ -6,9 +6,20 @@ editor:
     grid-grow-icon: grid-grow
     grid-show-icon: grid-show
 
+curves:
+    move_dt:
+        type: const
+        value: float_vector
+        default: [0.f, 0.f]
+
 objects:
     test-obj:
         curves:
             - [position, [1, 2] ]
-            - [size, [1, 2] ]
-        systems: [nothing_system]
+            - [size, [0, 0] ]
+        systems: [spawn_system]
+    ball:
+        curves:
+            - [position, [1, 2] ]
+            - [size, [10, 10] ]
+        systems: bounce_move 
