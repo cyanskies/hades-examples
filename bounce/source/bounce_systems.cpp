@@ -3,26 +3,29 @@
 #include "hades/GameInterface.hpp"
 #include "Hades/simple_resources.hpp"
 
-hades::unique_id position	= hades::unique_id::zero,
-					ball	= hades::unique_id::zero;
+namespace global
+{
+	static hades::unique_id position = hades::unique_id::zero,
+		ball = hades::unique_id::zero;
 
-float pos_x = 0.f, pos_y = 0.f;
+	static float pos_x = 0.f, pos_y = 0.f;
+}
 
 void on_create_spawn(hades::system_job_data)
 {
 	//position the ball will be created in
-	position = hades::data::get_uid("position");
+	global::position = hades::data::get_uid("position");
 	//the id of the ball type to create
-	ball = hades::data::get_uid("ball");
+	global::ball = hades::data::get_uid("ball");
 }
 
 void on_connect_spawn(hades::system_job_data game_data)
 {
 	const auto &curves = game_data.level_data->getCurves();
-	const auto pos = curves.floatVectorCurves.get({ game_data.entity, position });
+	const auto pos = curves.floatVectorCurves.get({ game_data.entity, global::position });
 	const auto fpos = pos.get(game_data.current_time);
-	pos_x = fpos[0];
-	pos_y = fpos[1];
+	global::pos_x = fpos[0];
+	global::pos_y = fpos[1];
 	return;
 }
 
