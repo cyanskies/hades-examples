@@ -260,7 +260,7 @@ std::vector<sf::Sprite> make_walls(const hades::resources::animation &wall_anim)
 
 	//top
 	sf::Sprite top_wall;
-	hades::animation::Apply(&wall_anim, 0.f, top_wall);
+	hades::animation::apply(wall_anim, 0.f, top_wall);
 
 	for(auto i = 0; i < screen_x; i += wall_length)
 	{
@@ -311,7 +311,7 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	const auto paddle_id = hades::data::get_uid("paddle-anim");
 	const auto paddle_anim = hades::data::get<anim>(paddle_id);
 
-	hades::animation::Apply(paddle_anim, 0.f, e.paddle);
+	hades::animation::apply(*paddle_anim, 0.f, e.paddle);
 
 	const auto screen_xf = static_cast<float>(screen_x);
 	const auto screen_yf = static_cast<float>(screen_y);
@@ -330,7 +330,7 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 		for (auto i = 0; i < blocks_hori; ++i)
 		{
 			sf::Sprite block;
-			hades::animation::Apply(block_anim, 0.f, block);
+			hades::animation::apply(*block_anim, 0.f, block);
 
 			const auto x = i * block_size_x + wall_size_x;
 			const auto y = row * block_size_y + block_size_y * 3;
@@ -346,7 +346,7 @@ breakout_game::game_elements breakout_game::_prepare_game() const
 	const auto ball_id = hades::data::get_uid("ball-anim");
 	const auto ball_anim = hades::data::get<anim>(ball_id);
 
-	hades::animation::Apply(ball_anim, 0.f, e.ball);
+	hades::animation::apply(*ball_anim, 0.f, e.ball);
 
 	const auto ball_start_x = screen_x - screen_x / 2;
 	const auto ball_start_y = screen_y - screen_y / 2;

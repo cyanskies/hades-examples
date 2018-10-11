@@ -2,7 +2,7 @@
 #define BOUNCE_SYSTEMS_HPP
 
 #include "hades/data.hpp"
-#include "Hades/systems.hpp"
+#include "hades/game_system.hpp"
 
 void register_bounce_systems(hades::data::data_manager &data);
 

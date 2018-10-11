@@ -1,0 +1,18 @@
+level:
+  width: 200
+  height: 200
+objects:
+  -2147483647:
+    type: ball
+    curves:
+      position: "[112, 96]"
+      size: "[20, 20]"
+  -2147483646:
+    type: ball
+    curves:
+      position: "[64, 56]"
+  -2147483645:
+    type: ball
+    curves:
+      position: "[96, 160]"
+next_id: -2147483645

@@ -1,5 +1,6 @@
 #include "Hades/App.hpp"
 #include "Hades/Main.hpp"
+#include "Hades/core_resources.hpp"
 
 #include "Objects/editor.hpp"
 
@@ -17,7 +18,9 @@ std::string_view defaultGame()
 }
 
 void resourceTypes(hades::data::data_system &data)
-{}
+{
+	hades::register_core_resources(data);
+}
 
 void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::command_list &commandLine)
 {

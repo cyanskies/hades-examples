@@ -1,6 +1,7 @@
 #include "bounce_systems.hpp"
 
-#include "hades/GameInterface.hpp"
+#include "hades/curve_extra.hpp"
+#include "hades/level_interface.hpp"
 #include "Hades/simple_resources.hpp"
 
 namespace global
@@ -22,7 +23,7 @@ void on_create_spawn(hades::system_job_data)
 void on_connect_spawn(hades::system_job_data game_data)
 {
 	const auto &curves = game_data.level_data->getCurves();
-	const auto pos = curves.floatVectorCurves.get({ game_data.entity, global::position });
+	const auto pos = curves.float_vector_curves.get({ game_data.entity, global::position });
 	const auto fpos = pos.get(game_data.current_time);
 	global::pos_x = fpos[0];
 	global::pos_y = fpos[1];
@@ -51,14 +52,12 @@ void create_curves(hades::data::data_manager &data)
 
 	using namespace hades::resources;
 
-	auto move_curve = hades::data::FindOrCreate<curve>(id, hades::unique_id::zero, &data);
+	auto move_curve = data.find_or_create<curve>(id, hades::unique_id::zero);
 
 	move_curve->curve_type = hades::curve_type::const_c;
-	move_curve->data_type = VariableType::VECTOR_FLOAT;
+	move_curve->data_type = hades::resources::curve_variable_type::vector_float;
 
-	auto default_v = curve_default_value{ true };
-	default_v.value = curve_types::vector_float{ 0.f, 0.f };
-	move_curve->default_value = std::move(default_v);
+	move_curve->default_value = curve_types::vector_float{ 0.f, 0.f };
 }
 
 void register_bounce_systems(hades::data::data_manager &data)
