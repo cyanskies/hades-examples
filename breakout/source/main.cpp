@@ -2,7 +2,7 @@
 #include "Hades/Main.hpp"
 #include "Hades/core_resources.hpp"
 
-#include "Objects/editor.hpp"
+//#include "Objects/editor.hpp"
 
 #include "breakout_state.hpp"
 #include "input.hpp"
@@ -28,11 +28,11 @@ void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades:
 
 	set_window_size();
 
-	const auto editor = hades::LoadCommand(commandLine, "editor", [&state](auto &&args) {
+	/*const auto editor = hades::LoadCommand(commandLine, "editor", [&state](auto &&args) {
 		state.push(std::make_unique<objects::object_editor>());
 		return true;
 	});
 
-	if(!editor)
+	if(!editor)*/
 		state.push(std::make_unique<breakout_game>());
 }

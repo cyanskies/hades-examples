@@ -2,7 +2,7 @@
 #include "Hades/Main.hpp"
 #include "Hades/common-input.hpp"
 
-#include "Objects/editor.hpp"
+//#include "Objects/editor.hpp"
 
 #include "bounce_state.hpp"
 #include "bounce_systems.hpp"
@@ -19,7 +19,7 @@ std::string_view defaultGame()
 
 void resourceTypes(hades::data::data_system &data)
 {
-	objects::RegisterObjectResources(&data);
+	//objects::RegisterObjectResources(&data);
 
 	register_bounce_systems(data);
 }
@@ -28,13 +28,13 @@ void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades:
 {
 	hades::RegisterMouseInput(bindings);
 
-	const auto editor = hades::LoadCommand(commandLine, "editor", [&state](auto &&args) {
+	/*const auto editor = hades::LoadCommand(commandLine, "editor", [&state](auto &&args) {
 		state.push(std::make_unique<objects::object_editor>());
 		return true;
 	});
 
 	if (editor)
 		state.push(std::make_unique<objects::object_editor>());
-	else
+	else*/
 		state.push(std::make_unique<bounce_state>());
 }
