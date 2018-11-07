@@ -60,7 +60,7 @@ void breakout_game::init()
 	_ball_velocity = hades::vector::resize(_ball_velocity, ball_speed);
 }
 
-bool breakout_game::handleEvent(const hades::event &)
+bool breakout_game::handle_event(const hades::event &)
 {
 	return false;
 }
@@ -75,7 +75,7 @@ sf::Vector2i invert_direction(sf::FloatRect intersection, sf::Vector2i velocity)
 	return velocity;
 }
 
-void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_system::action_set a)
+void breakout_game::update(hades::time_duration, const sf::RenderTarget&, hades::input_system::action_set a)
 {
 	//apply user input
 	auto move_left = a.find(input::names[input::move_left]);
@@ -195,11 +195,11 @@ void breakout_game::update(sf::Time, const sf::RenderTarget&, hades::input_syste
 	if (ball_bounds.y > screen_y)
 	{
 		kill();
-		this->PushStateUnder(std::make_unique<breakout_game>());
+		this->push_state_under(std::make_unique<breakout_game>());
 	}
 }
 
-void breakout_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
+void breakout_game::draw(sf::RenderTarget & target, hades::time_duration deltaTime)
 {
 	target.setView(_game_view);
 	//draw all

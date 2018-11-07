@@ -5,6 +5,7 @@
 #include "hades/objects.hpp"
 #include "Hades/files.hpp"
 #include "Hades/Server.hpp"
+#include "hades/time.hpp"
 
 void bounce_state::init()
 {
@@ -16,17 +17,17 @@ void bounce_state::init()
 	_server = hades::create_server(sv);
 }
 
-bool bounce_state::handleEvent(const hades::event &)
+bool bounce_state::handle_event(const hades::event &)
 {
 	return false;
 }
 
-void bounce_state::update(sf::Time deltaTime, const sf::RenderTarget&, hades::input_system::action_set)
+void bounce_state::update(hades::time_duration deltaTime, const sf::RenderTarget&, hades::input_system::action_set)
 {
-	_server->update(deltaTime);
+	_server->update(hades::to_sfml_time(deltaTime));
 }
 
-void bounce_state::draw(sf::RenderTarget & target, sf::Time deltaTime)
+void bounce_state::draw(sf::RenderTarget & target, hades::time_duration deltaTime)
 {
 }
 

@@ -15,13 +15,13 @@ constexpr std::tuple<hades::types::int32, hades::types::int32> screen_size();
 
 void set_window_size();
 
-class breakout_game : public hades::State
+class breakout_game : public hades::state
 {
 public:
 	void init() override;
-	bool handleEvent(const hades::event&) override;
-	void update(sf::Time deltaTime, const sf::RenderTarget&, hades::input_system::action_set) override;
-	void draw(sf::RenderTarget &target, sf::Time deltaTime) override;
+	bool handle_event(const hades::event&) override;
+	void update(hades::time_duration deltaTime, const sf::RenderTarget&, hades::input_system::action_set) override;
+	void draw(sf::RenderTarget &target, hades::time_duration deltaTime) override;
 
 	void reinit() override; 
 	void pause() override;

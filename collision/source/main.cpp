@@ -1,5 +1,5 @@
-#include "hades/common-input.hpp"
 #include "Hades/Main.hpp"
+#include "hades/mouse_input.hpp"
 
 #include "collision_state.hpp"
 
@@ -22,7 +22,7 @@ void resourceTypes(hades::data::data_system &data)
 
 void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::command_list &commandLine)
 {
-	hades::RegisterMouseInput(bindings);
+	hades::register_mouse_input(bindings);
 	bindings.create(change_shape, false, "space");
 	state.push(std::make_unique<collision_game>());
 }

@@ -4,6 +4,7 @@
 #include "Hades/Data.hpp"
 #include "Hades/Logging.hpp"
 #include "Hades/Properties.hpp"
+#include "hades/time.hpp"
 
 const float margin = 50.f;
 const auto safe_col = sf::Color::Green;
@@ -50,7 +51,7 @@ void collision_game::init()
 	_target = { middle.x, middle.y };
 }
 
-bool collision_game::handleEvent(const hades::event &)
+bool collision_game::handle_event(const hades::event &)
 {
 	return false;
 }
@@ -88,14 +89,14 @@ std::tuple<vector_f, bool> move_object(vector_f target, T o, U a, V b, W c)
 	return { move, collide_a || collide_b || collide_c };
 }
 
-void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_system::action_set a)
+void collision_game::update(hades::time_duration t, const sf::RenderTarget&, hades::input_system::action_set a)
 {
 	static const auto safe_col = sf::Color::Green;
 	static const auto hit_col = sf::Color::Red;
 
 	static const auto change_shape = hades::data::get_uid("change_shape");
 
-	_current += t;
+	_current += hades::to_sfml_time(t);
 
 	const auto ch_shape = a.find(change_shape);
 	if (ch_shape->active && _current - _shape_change_time > sf::milliseconds(100))
@@ -145,7 +146,7 @@ void collision_game::update(sf::Time t, const sf::RenderTarget&, hades::input_sy
 
 }
 
-void collision_game::draw(sf::RenderTarget & target, sf::Time deltaTime)
+void collision_game::draw(sf::RenderTarget & target, hades::time_duration deltaTime)
 {
 	target.draw(_backdrop);
 
