@@ -4,6 +4,7 @@
 #include "Hades/Data.hpp"
 #include "Hades/Logging.hpp"
 #include "Hades/Properties.hpp"
+#include "hades/sf_time.hpp"
 #include "hades/time.hpp"
 
 const float margin = 50.f;
