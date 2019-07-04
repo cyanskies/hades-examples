@@ -1,6 +1,9 @@
 #ifndef BOUNCE_HPP
 #define BOUNCE_HPP
 
+#include <memory>
+
+#include "hades/render_interface.hpp"
 #include "Hades/Server.hpp"
 #include "Hades/State.hpp"
 
@@ -15,7 +18,9 @@ public:
 	void reinit() override;
 	void pause() override;
 	void resume() override;
+
 private:
+	hades::render_interface _render_output;
 	std::unique_ptr<hades::server_hub> _server;
 };
 

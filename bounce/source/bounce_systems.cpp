@@ -1,73 +1,129 @@
 #include "bounce_systems.hpp"
 
+#include "hades/core_curves.hpp"
 #include "hades/curve_extra.hpp"
+#include "hades/game_system.hpp"
 #include "hades/level_interface.hpp"
-#include "Hades/simple_resources.hpp"
+#include "hades/quad_map.hpp"
+#include "hades/simple_resources.hpp"
 
 namespace global
 {
-	static hades::unique_id position = hades::unique_id::zero,
-		ball = hades::unique_id::zero;
-
-	static float pos_x = 0.f, pos_y = 0.f;
+	static auto ball_o = hades::unique_id::zero,
+		last_spawn_time_c = hades::unique_id::zero,
+		move_d = hades::unique_id::zero;
 }
 
-void on_create_spawn(hades::system_job_data)
+namespace spawn
 {
-	//position the ball will be created in
-	global::position = hades::data::get_uid("position");
-	//the id of the ball type to create
-	global::ball = hades::data::get_uid("ball");
+	void on_update()
+	{
+		//NOTE: object must have last_spawn_time curve
+		constexpr hades::time_duration spawn_delay = hades::seconds{ 2 };
+
+		//check when the last spawn time was
+		using spawn_time_t = hades::resources::curve_types::int_t;
+		auto spawn_time = hades::game::level::get_curve<spawn_time_t>(global::last_spawn_time_c);
+
+		const auto time = hades::game::get_time();
+		const auto [last_spawn_time, spawn_count] = spawn_time.getPrevious(time);
+	
+		if (last_spawn_time + spawn_delay > time)
+			return;
+
+		const auto [x_c, y_c] = hades::get_position_curve_id();
+		using position_t = hades::resources::curve_types::float_t;
+		const auto x = hades::game::level::get_value<position_t>(x_c),
+			y = hades::game::level::get_value<position_t>(y_c);
+
+		//create new ball object at x, y with a random move_d
+		const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
+		auto ball = hades::make_instance(ball_type);
+		hades::game::level::create_object(std::move(ball));
+
+		//update the last spawn time
+		spawn_time.set(time, spawn_count + 1);
+		hades::game::level::set_curve(global::last_spawn_time_c, std::move(spawn_time));
+
+		return;
+	}
 }
 
-void on_connect_spawn(hades::system_job_data game_data)
+namespace move
 {
-	const auto &curves = game_data.level_data->get_curves();
-	const auto pos = curves.float_vector_curves.get({ game_data.entity, global::position });
-	const auto fpos = pos.get(game_data.current_time);
-	global::pos_x = fpos[0];
-	global::pos_y = fpos[1];
-	return;
-}
+	using namespace hades::resources::curve_types;
+	using quad_map = hades::quad_tree<object_ref, hades::rect_t<float_t>>;
 
-void spawn_system(hades::system_job_data game_data)
-{
-	//spawn a new ball at entities location 
+	static auto quad_map_id = hades::unique_id{};
 
+	void on_create()
+	{
+		hades::game::create_system_value(quad_map_id, quad_map{});
+		return;
+	}
 
+	void on_connect()
+	{
+		//generate random move
+		auto move = vector_float{
+			hades::random(-1.f, 1.f),
+			hades::random(-1.f, 1.f)
+		};
+		hades::game::level::set_value<vector_float>(global::move_d, std::move(move));
+		
+		//add to quadmap
+		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		hades::game::set_system_value(quad_map_id, std::move(map));
+		return;
+	}
 
+	void on_disconnect()
+	{
+		//remove from quadmap
+		return;
+	}
 
-	return;
-}
+	void on_update()
+	{
+		//more
+		return;
+	}
 
-void move_system(hades::system_job_data)
-{
-	return;
+	void on_destroy()
+	{
+		hades::game::destroy_system_value(quad_map_id);
+		return;
+	}
 }
 
 void create_curves(hades::data::data_manager &data)
 {
-	//create the movement curve
-	const auto id = data.get_uid("move_d");
-
 	using namespace hades::resources;
 
-	auto move_curve = data.find_or_create<curve>(id, hades::unique_id::zero);
-
-	move_curve->c_type = hades::curve_type::const_c;
-	move_curve->data_type = hades::resources::curve_variable_type::vector_float;
-
+	//create the movement curve
+	global::move_d = data.get_uid("move_d");	
+	auto move_curve = data.find_or_create<curve>(global::move_d, hades::unique_id::zero);
+	move_curve->c_type = hades::curve_type::step;
+	//can be a vector, since we don't need to lerp this value
+	move_curve->data_type = curve_variable_type::vector_float;
 	move_curve->default_value = curve_types::vector_float{ 0.f, 0.f };
+
+	global::last_spawn_time_c = data.get_uid("last_spawn_time");
+	auto last_spawn_curve = data.find_or_create<curve>(global::last_spawn_time_c, hades::unique_id::zero);
+	last_spawn_curve->c_type = hades::curve_type::pulse;
+	last_spawn_curve->data_type = curve_variable_type::int_t;
+	last_spawn_curve->default_value = curve_types::int_t{};
 }
 
 void register_bounce_systems(hades::data::data_manager &data)
 {
 	//create a system that does nothing;
-	hades::make_system("spawn_system", 
-		on_create_spawn,
-		on_connect_spawn,
+	hades::make_system("ball_spawn_system", 
 		nullptr,
-		spawn_system,
 		nullptr,
-		data);
+		nullptr,
+		spawn::on_update,
+		nullptr,
+		data
+	);
 }

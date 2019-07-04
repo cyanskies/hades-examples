@@ -51,3 +51,4 @@ install_manifest.txt
 bounce/source/bounce/bounce.lvl
 bounce/source/bounce/bounce_uncompressed.lvl
 x64/
+*.vcxproj.*
