@@ -7,19 +7,23 @@ editor:
     grid-show-icon: grid-show
 
 curves:
-    move_dt:
+    move-dt:
         type: const
         value: float_vector
         default: [0.f, 0.f]
 
 objects:
-    test-obj:
+    spawner:
         curves:
-            - [position, [1, 2] ]
-            - [size, [0, 0] ]
-        systems: [spawn_system]
+            - position-x
+            - position-y
+            - last-spawn-time
+        systems: [ball-spawn-system]
     ball:
         curves:
-            - [position, [1, 2] ]
-            - [size, [10, 10] ]
-        systems: bounce_move 
+            - position-x
+            - position-y
+            - size-x
+            - size-y
+            - move-dt
+        systems: bounce-move 

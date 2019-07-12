@@ -1,2 +1,13 @@
-xÚMŒK
-ƒ@÷âá:Â¨ƒŸ¾J‚Ú8-âˆÓ1æöÑ¸qYõŠ7ñÆEÀGzu„Ì˜Ëàô"ßÜi8›$Kmi«¼°å‰€~&(Mì¯º÷ºq¸f`ñATüLˆŸuñ@e^q4ó®ôtÿûş_$±
+level:
+  width: 512
+  height: 512
+  name: Bounce example
+  desc: Spawns balls to bounce around the scene
+  next_id: -2147483646
+  objects:
+    -2147483646:
+      type: spawner
+      curves:
+        position-x: 88.000000
+        position-y: 88.000000
+

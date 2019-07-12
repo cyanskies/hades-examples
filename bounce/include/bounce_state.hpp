@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "Hades/render_instance.hpp"
 #include "hades/render_interface.hpp"
 #include "Hades/Server.hpp"
 #include "Hades/State.hpp"
@@ -21,6 +22,9 @@ public:
 
 private:
 	hades::render_interface _render_output;
+	hades::render_instance _client_level;
+	hades::server_level* _level = nullptr;
+	hades::time_point _current_time;
 	std::unique_ptr<hades::server_hub> _server;
 };
 

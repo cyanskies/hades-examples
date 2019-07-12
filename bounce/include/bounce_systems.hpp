@@ -4,6 +4,7 @@
 #include "hades/data.hpp"
 #include "hades/game_system.hpp"
 
+void register_bounce_resources(hades::data::data_manager& data);
 void register_bounce_systems(hades::data::data_manager &data);
 
 #endif // !BOUNCE_SYSTEMS_HPP

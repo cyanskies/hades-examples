@@ -96,33 +96,47 @@ namespace move
 	}
 }
 
-void create_curves(hades::data::data_manager &data)
+void register_bounce_resources(hades::data::data_manager &data)
 {
+	hades::register_objects(data);
+	hades::register_game_system_resources(data);
+
 	using namespace hades::resources;
+	using namespace std::string_view_literals;
 
 	//create the movement curve
-	global::move_d = data.get_uid("move_d");	
+	global::move_d = data.get_uid("move-dt"sv);	
 	auto move_curve = data.find_or_create<curve>(global::move_d, hades::unique_id::zero);
 	move_curve->c_type = hades::curve_type::step;
 	//can be a vector, since we don't need to lerp this value
 	move_curve->data_type = curve_variable_type::vector_float;
 	move_curve->default_value = curve_types::vector_float{ 0.f, 0.f };
 
-	global::last_spawn_time_c = data.get_uid("last_spawn_time");
+	global::last_spawn_time_c = data.get_uid("last-spawn-time"sv);
 	auto last_spawn_curve = data.find_or_create<curve>(global::last_spawn_time_c, hades::unique_id::zero);
 	last_spawn_curve->c_type = hades::curve_type::pulse;
 	last_spawn_curve->data_type = curve_variable_type::int_t;
 	last_spawn_curve->default_value = curve_types::int_t{};
+
+	global::ball_o = data.get_uid("ball"sv);
 }
 
 void register_bounce_systems(hades::data::data_manager &data)
 {
-	//create a system that does nothing;
-	hades::make_system("ball_spawn_system", 
+	hades::make_system("ball-spawn-system", 
 		nullptr,
 		nullptr,
 		nullptr,
 		spawn::on_update,
+		nullptr,
+		data
+	);
+
+	hades::make_system("bounce-move",
+		nullptr,
+		nullptr,
+		nullptr,
+		nullptr,
 		nullptr,
 		data
 	);
