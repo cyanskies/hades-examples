@@ -1,10 +1,12 @@
 #include "bounce_systems.hpp"
 
+#include "hades/collision.hpp"
 #include "hades/core_curves.hpp"
 #include "hades/curve_extra.hpp"
 #include "hades/game_system.hpp"
 #include "hades/level_interface.hpp"
 #include "hades/quad_map.hpp"
+#include "Hades/rectangle_math.hpp"
 #include "hades/simple_resources.hpp"
 
 namespace global
@@ -69,10 +71,19 @@ namespace move
 			hades::random(-1.f, 1.f),
 			hades::random(-1.f, 1.f)
 		};
+
 		hades::game::level::set_value<vector_float>(global::move_d, std::move(move));
 		
+		const auto rect = hades::world_rect_t{
+			hades::game::level::get_position(),
+			hades::game::level::get_size()
+		};
+
+		//TODO: if we are being connected while in a colliding position then
+		// we should kill this entity
 		//add to quadmap
 		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		map.insert(rect, hades::game::get_object());
 		hades::game::set_system_value(quad_map_id, std::move(map));
 		return;
 	}
@@ -80,12 +91,46 @@ namespace move
 	void on_disconnect()
 	{
 		//remove from quadmap
+		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		map.remove(hades::game::get_object());
+		hades::game::set_system_value(quad_map_id, std::move(map));
 		return;
 	}
 
 	void on_update()
 	{
-		//more
+		//TODO: generate move vector
+		// try move
+		// update variables
+		const auto pos = hades::game::level::get_position();
+		const auto siz = hades::game::level::get_size();
+		const auto move = hades::game::level::get_value<vector_float>(global::move_d);
+		assert(std::size(move) == 2);
+
+		const auto current_rect = hades::rect_float{ pos, siz };
+		const auto search_area = [move, current_rect]() {
+			auto centre_rect = hades::to_rect_centre(current_rect);
+			centre_rect.half_width += move[0];
+			centre_rect.half_width += move[1];
+			return hades::to_rect(centre_rect);
+		}();
+
+		//get all nearby collision rects
+		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		const auto other_rects = map.find_collisions(search_area);
+		auto others = std::vector<hades::rect_float>{};
+		others.reserve(std::size(other_rects));
+
+		std::transform(std::cbegin(other_rects), std::cend(other_rects), 
+			std::back_inserter(others), [](auto &&r) {
+			return r.rect;
+		});
+
+		const auto final_move = hades::safe_move(current_rect, 
+			hades::vector_t{ move[0], move[1] }, std::begin(others), std::end(others));
+
+		
+
 		return;
 	}
 

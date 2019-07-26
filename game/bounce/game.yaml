@@ -6,6 +6,19 @@ editor:
     grid-grow-icon: grid-grow
     grid-show-icon: grid-show
 
+textures:
+    ball-texture:
+        source: ball.png
+
+animations:
+    ball-anim:
+        duration: 1
+        texture: ball-texture
+        width: 90
+        height: 90
+        frames:
+            - [0, 0, 1.0]
+
 curves:
     move-dt:
         type: const
@@ -18,8 +31,9 @@ objects:
             - position-x
             - position-y
             - last-spawn-time
-        systems: [ball-spawn-system]
+        systems: ball-spawn-system
     ball:
+        editor-anim: ball-anim
         curves:
             - position-x
             - position-y
@@ -27,3 +41,4 @@ objects:
             - size-y
             - move-dt
         systems: bounce-move 
+        client-systems: simple-renderer
