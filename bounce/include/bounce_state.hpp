@@ -21,6 +21,8 @@ public:
 	void resume() override;
 
 private:
+	sf::View _view;
+
 	hades::render_interface _render_output;
 	hades::render_instance _client_level;
 	hades::server_level* _level = nullptr;

@@ -1,9 +1,12 @@
 #include "bounce_state.hpp"
 
-#include "yaml-cpp/yaml.h"
+//#include "yaml-cpp/yaml.h"
 
-#include "Hades/files.hpp"
+#include "hades/camera.hpp"
+#include "hades/console_variables.hpp"
+#include "hades/files.hpp"
 #include "hades/level.hpp"
+#include "hades/properties.hpp"
 #include "Hades/Server.hpp"
 #include "hades/time.hpp"
 
@@ -33,11 +36,18 @@ void bounce_state::draw(sf::RenderTarget &target, hades::time_duration deltaTime
 	_client_level.input_updates(changes);
 	_current_time += deltaTime;
 	_client_level.make_frame_at(_current_time, nullptr, _render_output);
+	target.setView(_view);
 	target.draw(_render_output);
 }
 
 void bounce_state::reinit()
 {
+	const auto w = hades::console::get_int(hades::cvars::video_width, 
+		hades::cvars::default_value::video_width);
+	const auto h = hades::console::get_int(hades::cvars::video_height,
+		hades::cvars::default_value::video_height);
+
+	_view.setSize({ static_cast<float>(*w), static_cast<float>(*h) });
 }
 
 void bounce_state::pause()

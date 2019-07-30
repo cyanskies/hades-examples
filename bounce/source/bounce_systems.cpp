@@ -56,7 +56,7 @@ namespace move
 	using namespace hades::resources::curve_types;
 	using quad_map = hades::quad_tree<object_ref, hades::rect_t<float_t>>;
 
-	static auto quad_map_id = hades::unique_id{};
+	static const auto quad_map_id = hades::unique_id{};
 
 	void on_create()
 	{
@@ -129,7 +129,7 @@ namespace move
 		const auto final_move = hades::safe_move(current_rect, 
 			hades::vector_t{ move[0], move[1] }, std::begin(others), std::end(others));
 
-		
+		//compare magnitudes and then perform the bounce
 
 		return;
 	}

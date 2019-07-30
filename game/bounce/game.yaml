@@ -33,6 +33,7 @@ objects:
             - last-spawn-time
         systems: ball-spawn-system
     ball:
+        editor-icon: ball-anim
         editor-anim: ball-anim
         curves:
             - position-x
