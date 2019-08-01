@@ -25,12 +25,11 @@ namespace spawn
 
 		//check when the last spawn time was
 		using spawn_time_t = hades::resources::curve_types::int_t;
-		auto spawn_time = hades::game::level::get_curve<spawn_time_t>(global::last_spawn_time_c);
+		const auto spawn_time = hades::game::level::get_keyframe<spawn_time_t>(global::last_spawn_time_c);
 
 		const auto time = hades::game::get_time();
-		const auto [last_spawn_time, spawn_count] = spawn_time.getPrevious(time);
 	
-		if (last_spawn_time + spawn_delay > time)
+		if (spawn_time.time + spawn_delay > time)
 			return;
 
 		const auto [x_c, y_c] = hades::get_position_curve_id();
@@ -41,12 +40,12 @@ namespace spawn
 		//create new ball object at x, y with a random move_d
 		const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
 		auto ball = hades::make_instance(ball_type);
+		hades::set_curve(ball, x_c, x);
+		hades::set_curve(ball, y_c, y);
 		hades::game::level::create_object(std::move(ball));
 
 		//update the last spawn time
-		spawn_time.set(time, spawn_count + 1);
-		hades::game::level::set_curve(global::last_spawn_time_c, std::move(spawn_time));
-
+		hades::game::level::set_value(global::last_spawn_time_c, time, spawn_time.value + 1);
 		return;
 	}
 }
@@ -66,6 +65,9 @@ namespace move
 
 	void on_connect()
 	{
+		//we must get a value before we can set it
+		hades::game::level::get_value<vector_float>(global::move_d);
+
 		//generate random move
 		auto move = vector_float{
 			hades::random(-1.f, 1.f),
@@ -79,10 +81,12 @@ namespace move
 			hades::game::level::get_size()
 		};
 
-		//TODO: if we are being connected while in a colliding position then
-		// we should kill this entity
 		//add to quadmap
 		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+
+		//TODO: if we are being connected while in a colliding position then
+		// we should kill this entity
+
 		map.insert(rect, hades::game::get_object());
 		hades::game::set_system_value(quad_map_id, std::move(map));
 		return;
@@ -126,11 +130,18 @@ namespace move
 			return r.rect;
 		});
 
-		const auto final_move = hades::safe_move(current_rect, 
-			hades::vector_t{ move[0], move[1] }, std::begin(others), std::end(others));
+		const auto full_move = hades::vector_t{ move[0], move[1] };
+		const auto [final_move, iter] = hades::safe_move(current_rect,
+			full_move, std::begin(others), std::end(others));
 
-		//compare magnitudes and then perform the bounce
+		//TODO: handle collisions
+		if (iter != std::end(others))
+		{
+			//compare magnitudes and then perform the bounce
+		}
 
+		const auto [x, y] = pos + final_move;
+		hades::game::level::set_position(x, y);
 		return;
 	}
 
@@ -178,11 +189,11 @@ void register_bounce_systems(hades::data::data_manager &data)
 	);
 
 	hades::make_system("bounce-move",
-		nullptr,
-		nullptr,
-		nullptr,
-		nullptr,
-		nullptr,
+		move::on_create,
+		move::on_connect,
+		move::on_disconnect,
+		move::on_update,
+		move::on_destroy,
 		data
 	);
 }

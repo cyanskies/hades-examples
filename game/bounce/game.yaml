@@ -38,8 +38,8 @@ objects:
         curves:
             - position-x
             - position-y
-            - size-x
-            - size-y
+            - [size-x, 25.f]
+            - [size-y, 25.f]
             - move-dt
         systems: bounce-move 
         client-systems: simple-renderer

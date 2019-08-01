@@ -36,6 +36,7 @@ void bounce_state::draw(sf::RenderTarget &target, hades::time_duration deltaTime
 	_client_level.input_updates(changes);
 	_current_time += deltaTime;
 	_client_level.make_frame_at(_current_time, nullptr, _render_output);
+	_render_output.prepare();
 	target.setView(_view);
 	target.draw(_render_output);
 }
