@@ -21,7 +21,7 @@ namespace spawn
 	void on_update()
 	{
 		//NOTE: object must have last_spawn_time curve
-		constexpr hades::time_duration spawn_delay = hades::seconds{ 2 };
+		constexpr hades::time_duration spawn_delay = hades::seconds{ 1 };
 
 		//check when the last spawn time was
 		using spawn_time_t = hades::resources::curve_types::int_t;
@@ -59,7 +59,8 @@ namespace move
 
 	void on_create()
 	{
-		hades::game::create_system_value(quad_map_id, quad_map{});
+
+		hades::game::create_system_value(quad_map_id, quad_map{50});
 		return;
 	}
 
@@ -112,36 +113,39 @@ namespace move
 		assert(std::size(move) == 2);
 
 		const auto current_rect = hades::rect_float{ pos, siz };
-		const auto search_area = [move, current_rect]() {
+		const auto search_area = [&move, &current_rect]() {
 			auto centre_rect = hades::to_rect_centre(current_rect);
 			centre_rect.half_width += move[0];
 			centre_rect.half_width += move[1];
 			return hades::to_rect(centre_rect);
 		}();
 
-		//get all nearby collision rects
-		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
-		const auto other_rects = map.find_collisions(search_area);
-		auto others = std::vector<hades::rect_float>{};
-		others.reserve(std::size(other_rects));
+		////get all nearby collision rects
+		//auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		//const auto other_rects = map.find_collisions(search_area);
+		//auto others = std::vector<hades::rect_float>{};
+		//others.reserve(std::size(other_rects));
 
-		std::transform(std::cbegin(other_rects), std::cend(other_rects), 
-			std::back_inserter(others), [](auto &&r) {
-			return r.rect;
-		});
+		//std::transform(std::cbegin(other_rects), std::cend(other_rects), 
+		//	std::back_inserter(others), [](auto &&r) {
+		//	return r.rect;
+		//});
 
 		const auto full_move = hades::vector_t{ move[0], move[1] };
-		const auto [final_move, iter] = hades::safe_move(current_rect,
-			full_move, std::begin(others), std::end(others));
+		//const auto [final_move, iter] = hades::safe_move(current_rect,
+		//	full_move, std::begin(others), std::end(others));
 
-		//TODO: handle collisions
-		if (iter != std::end(others))
-		{
-			//compare magnitudes and then perform the bounce
-		}
+		////TODO: handle collisions
+		//if (iter != std::end(others))
+		//{
+		//	//compare magnitudes and then perform the bounce
+		//}
 
-		const auto [x, y] = pos + final_move;
+		const auto [x, y] = pos + full_move;
 		hades::game::level::set_position(x, y);
+
+		//update collision box pos
+
 		return;
 	}
 
