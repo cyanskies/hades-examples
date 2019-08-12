@@ -32,6 +32,9 @@ namespace spawn
 		if (spawn_time.time + spawn_delay > time)
 			return;
 
+		if (spawn_time.value > 59)
+			return;
+
 		const auto [x_c, y_c] = hades::get_position_curve_id();
 		using position_t = hades::resources::curve_types::float_t;
 		const auto x = hades::game::level::get_value<position_t>(x_c),
@@ -46,6 +49,8 @@ namespace spawn
 
 		//update the last spawn time
 		hades::game::level::set_value(global::last_spawn_time_c, time, spawn_time.value + 1);
+
+		LOG("balls: " + hades::to_string(spawn_time.value + 1));
 		return;
 	}
 }
@@ -59,7 +64,6 @@ namespace move
 
 	void on_create()
 	{
-
 		hades::game::create_system_value(quad_map_id, quad_map{50});
 		return;
 	}

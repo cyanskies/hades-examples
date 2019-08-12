@@ -32,7 +32,8 @@ void bounce_state::update(hades::time_duration deltaTime, const sf::RenderTarget
 
 void bounce_state::draw(sf::RenderTarget &target, hades::time_duration deltaTime)
 {
-	const auto changes = _level->get_changes();
+	static auto changes = hades::exported_curves{};
+	_level->get_changes(changes);
 	_client_level.input_updates(changes);
 	_current_time += deltaTime;
 	_client_level.make_frame_at(_current_time, nullptr, _render_output);
