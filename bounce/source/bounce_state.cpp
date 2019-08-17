@@ -40,6 +40,7 @@ void bounce_state::draw(sf::RenderTarget &target, hades::time_duration deltaTime
 	_render_output.prepare();
 	target.setView(_view);
 	target.draw(_render_output);
+	return;
 }
 
 void bounce_state::reinit()

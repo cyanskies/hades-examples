@@ -21,7 +21,7 @@ namespace spawn
 	void on_update()
 	{
 		//NOTE: object must have last_spawn_time curve
-		constexpr hades::time_duration spawn_delay = hades::seconds{ 1 };
+		constexpr hades::time_duration spawn_delay = hades::nanoseconds{ 1 };
 
 		//check when the last spawn time was
 		using spawn_time_t = hades::resources::curve_types::int_t;
@@ -32,7 +32,7 @@ namespace spawn
 		if (spawn_time.time + spawn_delay > time)
 			return;
 
-		if (spawn_time.value > 59)
+		if (spawn_time.value > 500) // 1000 in release
 			return;
 
 		const auto [x_c, y_c] = hades::get_position_curve_id();
