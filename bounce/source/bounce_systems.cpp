@@ -71,15 +71,15 @@ namespace move
 	void on_connect()
 	{
 		//we must get a value before we can set it
-		hades::game::level::get_value<vector_float>(global::move_d);
+		hades::game::level::get_value<collection_float>(global::move_d);
 
 		//generate random move
-		auto move = vector_float{
+		auto move = collection_float{
 			hades::random(-1.f, 1.f),
 			hades::random(-1.f, 1.f)
 		};
 
-		hades::game::level::set_value<vector_float>(global::move_d, std::move(move));
+		hades::game::level::set_value<collection_float>(global::move_d, std::move(move));
 		
 		const auto rect = hades::world_rect_t{
 			hades::game::level::get_position(),
@@ -113,7 +113,7 @@ namespace move
 		// update variables
 		const auto pos = hades::game::level::get_position();
 		const auto siz = hades::game::level::get_size();
-		const auto move = hades::game::level::get_value<vector_float>(global::move_d);
+		const auto move = hades::game::level::get_value<collection_float>(global::move_d);
 		assert(std::size(move) == 2);
 
 		const auto current_rect = hades::rect_float{ pos, siz };
@@ -135,7 +135,7 @@ namespace move
 		//	return r.rect;
 		//});
 
-		const auto full_move = hades::vector_t{ move[0], move[1] };
+		const auto full_move = hades::vector_float{ move[0], move[1] };
 		//const auto [final_move, iter] = hades::safe_move(current_rect,
 		//	full_move, std::begin(others), std::end(others));
 
@@ -173,8 +173,8 @@ void register_bounce_resources(hades::data::data_manager &data)
 	auto move_curve = data.find_or_create<curve>(global::move_d, hades::unique_id::zero);
 	move_curve->c_type = hades::curve_type::step;
 	//can be a vector, since we don't need to lerp this value
-	move_curve->data_type = curve_variable_type::vector_float;
-	move_curve->default_value = curve_types::vector_float{ 0.f, 0.f };
+	move_curve->data_type = curve_variable_type::collection_float;
+	move_curve->default_value = curve_types::collection_float{ 0.f, 0.f };
 
 	global::last_spawn_time_c = data.get_uid("last-spawn-time"sv);
 	auto last_spawn_curve = data.find_or_create<curve>(global::last_spawn_time_c, hades::unique_id::zero);

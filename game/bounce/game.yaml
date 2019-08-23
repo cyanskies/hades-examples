@@ -19,12 +19,6 @@ animations:
         frames:
             - [0, 0, 1.0]
 
-curves:
-    move-dt:
-        type: const
-        value: float_vector
-        default: [0.f, 0.f]
-
 objects:
     spawner:
         curves:
