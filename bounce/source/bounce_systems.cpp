@@ -32,7 +32,7 @@ namespace spawn
 		if (spawn_time.time + spawn_delay > time)
 			return;
 
-		if (spawn_time.value > 500) // 1000 in release
+		if (spawn_time.value > 5000) // 1000 in release
 			return;
 
 		const auto [x_c, y_c] = hades::get_position_curve_id();
