@@ -1,0 +1,39 @@
+mod:
+    name: bounce
+
+editor:
+    grid-shrink-icon: grid-shrink
+    grid-grow-icon: grid-grow
+    grid-show-icon: grid-show
+
+textures:
+    ball-texture:
+        source: ball.png
+
+animations:
+    ball-anim:
+        duration: 1
+        texture: ball-texture
+        width: 90
+        height: 90
+        frames:
+            - [0, 0, 1.0]
+
+objects:
+    spawner:
+        curves:
+            - position-x
+            - position-y
+            - last-spawn-time
+        systems: ball-spawn-system
+    ball:
+        editor-icon: ball-anim
+        editor-anim: ball-anim
+        curves:
+            - position-x
+            - position-y
+            - [size-x, 25.f]
+            - [size-y, 25.f]
+            - move-dt
+        systems: bounce-move 
+        client-systems: simple-renderer

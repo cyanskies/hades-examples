@@ -64,14 +64,14 @@ namespace move
 
 	void on_create()
 	{
-		hades::game::create_system_value(quad_map_id, quad_map{50});
+		hades::game::set_system_data(quad_map{50});
 		return;
 	}
 
 	void on_connect()
 	{
 		//we must get a value before we can set it
-		hades::game::level::get_value<collection_float>(global::move_d);
+		std::ignore = hades::game::level::get_value<collection_float>(global::move_d);
 
 		//generate random move
 		auto move = collection_float{
@@ -87,22 +87,22 @@ namespace move
 		};
 
 		//add to quadmap
-		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		auto &map = hades::game::get_system_data<quad_map>();
 
 		//TODO: if we are being connected while in a colliding position then
 		// we should kill this entity
 
 		map.insert(rect, hades::game::get_object());
-		hades::game::set_system_value(quad_map_id, std::move(map));
+		hades::game::set_system_data(std::move(map));
 		return;
 	}
 
 	void on_disconnect()
 	{
 		//remove from quadmap
-		auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+		auto &map = hades::game::get_system_data<quad_map>();
 		map.remove(hades::game::get_object());
-		hades::game::set_system_value(quad_map_id, std::move(map));
+		hades::game::set_system_data(std::move(map));
 		return;
 	}
 
@@ -155,7 +155,7 @@ namespace move
 
 	void on_destroy()
 	{
-		hades::game::destroy_system_value(quad_map_id);
+		hades::game::destroy_system_data();
 		return;
 	}
 }

@@ -24,7 +24,7 @@ private:
 	sf::View _view;
 
 	hades::render_interface _render_output;
-	hades::render_instance _client_level;
+	hades::render_instance _client_level{ nullptr };
 	hades::server_level* _level = nullptr;
 	hades::time_point _current_time;
 	std::unique_ptr<hades::server_hub> _server;

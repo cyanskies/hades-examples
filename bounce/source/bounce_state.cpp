@@ -18,6 +18,8 @@ void bounce_state::init()
 	_server = hades::create_server(std::move(sv));
 	_level = _server->connect_to_level(hades::unique_id::zero);
 	assert(_level);
+
+	_client_level = hades::render_instance{ _level->get_interface() };
 }
 
 bool bounce_state::handle_event(const hades::event &)
@@ -32,9 +34,6 @@ void bounce_state::update(hades::time_duration deltaTime, const sf::RenderTarget
 
 void bounce_state::draw(sf::RenderTarget &target, hades::time_duration deltaTime)
 {
-	static auto changes = hades::exported_curves{};
-	_level->get_changes(changes);
-	_client_level.input_updates(changes);
 	_current_time += deltaTime;
 	_client_level.make_frame_at(_current_time, nullptr, _render_output);
 	_render_output.prepare();
