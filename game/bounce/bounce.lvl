@@ -8,6 +8,5 @@ level:
     -2147483646:
       type: spawner
       curves:
-        position-x: 88.000000
-        position-y: 88.000000
+        position: [88.000000, 88.000000]
 

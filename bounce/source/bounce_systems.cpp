@@ -23,34 +23,38 @@ namespace spawn
 		//NOTE: object must have last_spawn_time curve
 		constexpr hades::time_duration spawn_delay = hades::nanoseconds{ 1 };
 
-		//check when the last spawn time was
-		using spawn_time_t = hades::resources::curve_types::int_t;
-		const auto spawn_time = hades::game::level::get_keyframe<spawn_time_t>(global::last_spawn_time_c);
+		const auto& objs = hades::game::get_objects();
+		const auto pos = hades::get_position_curve();
+		const auto ball_size = 0;
 
-		const auto time = hades::game::get_time();
-	
-		if (spawn_time.time + spawn_delay > time)
-			return;
+		for (const auto o : objs)
+		{
+			//check when the last spawn time was
+			using spawn_time_t = hades::resources::curve_types::int_t;
+			const auto spawn_time = hades::game::level::get_keyframe<spawn_time_t>({ o, global::last_spawn_time_c });
 
-		if (spawn_time.value > 5000) // 1000 in release
-			return;
+			const auto time = hades::game::get_time();
 
-		const auto [x_c, y_c] = hades::get_position_curve_id();
-		using position_t = hades::resources::curve_types::float_t;
-		const auto x = hades::game::level::get_value<position_t>(x_c),
-			y = hades::game::level::get_value<position_t>(y_c);
+			if (spawn_time.first + spawn_delay > time)
+				continue;
 
-		//create new ball object at x, y with a random move_d
-		const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
-		auto ball = hades::make_instance(ball_type);
-		hades::set_curve(ball, x_c, x);
-		hades::set_curve(ball, y_c, y);
-		hades::game::level::create_object(std::move(ball));
+			if (spawn_time.second > 500)
+				continue;
 
-		//update the last spawn time
-		hades::game::level::set_value(global::last_spawn_time_c, time, spawn_time.value + 1);
+			const auto p = hades::game::level::get_position(o);
 
-		LOG("balls: " + hades::to_string(spawn_time.value + 1));
+			//TODO: access quad map to ensure no collision
+
+			//create new ball object at x, y
+			const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
+			auto ball = hades::make_instance(ball_type);
+			hades::set_curve(ball, *pos, p);
+			hades::game::level::create_object(std::move(ball));
+
+			//update the last spawn time
+			hades::game::level::set_value({ o, global::last_spawn_time_c }, time, spawn_time.second + 1);
+		}
+
 		return;
 	}
 }
@@ -70,86 +74,106 @@ namespace move
 
 	void on_connect()
 	{
-		//we must get a value before we can set it
-		std::ignore = hades::game::level::get_value<collection_float>(global::move_d);
+		const auto &objs = hades::game::get_objects();
 
-		//generate random move
-		auto move = collection_float{
-			hades::random(-1.f, 1.f),
-			hades::random(-1.f, 1.f)
-		};
+		for (auto o : objs)
+		{
+			//we must get a value before we can set it
+			std::ignore = hades::game::level::get_value<collection_float>({ o, global::move_d });
 
-		hades::game::level::set_value<collection_float>(global::move_d, std::move(move));
-		
-		const auto rect = hades::world_rect_t{
-			hades::game::level::get_position(),
-			hades::game::level::get_size()
-		};
+			//generate random move
+			auto move = collection_float{
+				hades::random(-1.f, 1.f),
+				hades::random(-1.f, 1.f)
+			};
 
-		//add to quadmap
-		auto &map = hades::game::get_system_data<quad_map>();
+			hades::game::level::set_value<collection_float>({ o, global::move_d }, std::move(move));
 
-		//TODO: if we are being connected while in a colliding position then
-		// we should kill this entity
+			const auto rect = hades::world_rect_t{
+				hades::game::level::get_position(o),
+				hades::game::level::get_size(o)
+			};
 
-		map.insert(rect, hades::game::get_object());
-		hades::game::set_system_data(std::move(map));
+			//we must begin within the world bounds
+			const auto world_bounds = hades::game::level::get_world_bounds();
+			assert(hades::is_within(rect, world_bounds));
+
+			//add to quadmap
+			auto& map = hades::game::get_system_data<quad_map>();
+
+			if (const auto collisions = map.find_collisions(rect);
+				!std::empty(collisions))
+			{
+				//TODO: destroy ent
+			}
+
+			map.insert(rect, o);
+			hades::game::set_system_data(std::move(map));
+		}
 		return;
 	}
 
 	void on_disconnect()
 	{
-		//remove from quadmap
-		auto &map = hades::game::get_system_data<quad_map>();
-		map.remove(hades::game::get_object());
-		hades::game::set_system_data(std::move(map));
+		const auto& objs = hades::game::get_objects();
+
+		for (auto o : objs)
+		{
+			auto& map = hades::game::get_system_data<quad_map>();
+			map.remove(o);
+			hades::game::set_system_data(std::move(map));
+		}
 		return;
 	}
 
 	void on_update()
 	{
+		const auto& objs = hades::game::get_objects();
+		const auto time = hades::game::get_time();
 		//TODO: generate move vector
 		// try move
 		// update variables
-		const auto pos = hades::game::level::get_position();
-		const auto siz = hades::game::level::get_size();
-		const auto move = hades::game::level::get_value<collection_float>(global::move_d);
-		assert(std::size(move) == 2);
+		for (auto o : objs)
+		{
+			const auto pos = hades::game::level::get_position(o);
+			const auto siz = hades::game::level::get_size(o);
+			const auto move = hades::game::level::get_value<collection_float>({ o, global::move_d });
+			assert(std::size(move) == 2);
 
-		const auto current_rect = hades::rect_float{ pos, siz };
-		const auto search_area = [&move, &current_rect]() {
-			auto centre_rect = hades::to_rect_centre(current_rect);
-			centre_rect.half_width += move[0];
-			centre_rect.half_width += move[1];
-			return hades::to_rect(centre_rect);
-		}();
+			const auto current_rect = hades::rect_float{ pos, siz };
+			const auto search_area = [&move, &current_rect]() {
+				auto centre_rect = hades::to_rect_centre(current_rect);
+				centre_rect.half_width += move[0];
+				centre_rect.half_width += move[1];
+				return hades::to_rect(centre_rect);
+			}();
 
-		////get all nearby collision rects
-		//auto map = hades::game::get_system_value<quad_map>(quad_map_id);
-		//const auto other_rects = map.find_collisions(search_area);
-		//auto others = std::vector<hades::rect_float>{};
-		//others.reserve(std::size(other_rects));
+			////get all nearby collision rects
+			//auto map = hades::game::get_system_value<quad_map>(quad_map_id);
+			//const auto other_rects = map.find_collisions(search_area);
+			//auto others = std::vector<hades::rect_float>{};
+			//others.reserve(std::size(other_rects));
 
-		//std::transform(std::cbegin(other_rects), std::cend(other_rects), 
-		//	std::back_inserter(others), [](auto &&r) {
-		//	return r.rect;
-		//});
+			//std::transform(std::cbegin(other_rects), std::cend(other_rects), 
+			//	std::back_inserter(others), [](auto &&r) {
+			//	return r.rect;
+			//});
 
-		const auto full_move = hades::vector_float{ move[0], move[1] };
-		//const auto [final_move, iter] = hades::safe_move(current_rect,
-		//	full_move, std::begin(others), std::end(others));
+			const auto full_move = hades::vector_float{ move[0], move[1] };
+			//const auto [final_move, iter] = hades::safe_move(current_rect,
+			//	full_move, std::begin(others), std::end(others));
 
-		////TODO: handle collisions
-		//if (iter != std::end(others))
-		//{
-		//	//compare magnitudes and then perform the bounce
-		//}
+			////TODO: handle collisions
+			//if (iter != std::end(others))
+			//{
+			//	//compare magnitudes and then perform the bounce
+			//}
 
-		const auto [x, y] = pos + full_move;
-		hades::game::level::set_position(x, y);
+			const auto [x, y] = pos + full_move;
+			hades::game::level::set_position(o, x, y, time);
 
-		//update collision box pos
-
+			//update collision box pos
+		}
 		return;
 	}
 

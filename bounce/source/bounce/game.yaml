@@ -22,18 +22,15 @@ animations:
 objects:
     spawner:
         curves:
-            - position-x
-            - position-y
+            - position
             - last-spawn-time
         systems: ball-spawn-system
     ball:
         editor-icon: ball-anim
         editor-anim: ball-anim
         curves:
-            - position-x
-            - position-y
-            - [size-x, 25.f]
-            - [size-y, 25.f]
+            - position
+            - [size, [25.f, 25.f]]
             - move-dt
         systems: bounce-move 
         client-systems: simple-renderer
