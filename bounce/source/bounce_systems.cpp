@@ -16,6 +16,14 @@ namespace global
 		move_d = hades::unique_id::zero;
 }
 
+static auto quad_map_id = hades::unique_id{};
+using quad_map_t = hades::quad_tree<hades::game::object_ref, hades::rect_t<float_t>>;
+
+struct quad_map
+{
+	quad_map_t value{ 50 };
+};
+
 namespace spawn
 {
 	void on_update()
@@ -25,7 +33,7 @@ namespace spawn
 
 		const auto& objs = hades::game::get_objects();
 		const auto pos = hades::get_position_curve();
-		const auto ball_size = 0;
+		const auto& q_map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
 
 		for (const auto o : objs)
 		{
@@ -42,17 +50,28 @@ namespace spawn
 				continue;
 
 			const auto p = hades::game::level::get_position(o);
-
-			//TODO: access quad map to ensure no collision
-
+			
 			//create new ball object at x, y
 			const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
 			auto ball = hades::make_instance(ball_type);
-			hades::set_curve(ball, *pos, p);
-			hades::game::level::create_object(std::move(ball));
+			hades::set_position(ball, p);
+			const auto s = hades::get_size(ball);
+
+			//check for collision
+			const auto rect = hades::rect_float{ p, s };
+			const auto others = q_map.value.find_collisions(rect);
+			
+			//if we collide, then skip until next tick
+			if (std::any_of(std::begin(others), std::end(others), [rect](auto&& o) {
+				return hades::collision_test(rect, o.rect);
+			}))
+			{
+				continue;
+			}
 
 			//update the last spawn time
 			hades::game::level::set_value({ o, global::last_spawn_time_c }, time, spawn_time.second + 1);
+			hades::game::level::create_object(std::move(ball));
 		}
 
 		return;
@@ -62,15 +81,8 @@ namespace spawn
 namespace move
 {
 	using namespace hades::resources::curve_types;
-	using quad_map = hades::quad_tree<object_ref, hades::rect_t<float_t>>;
-
+	
 	static const auto quad_map_id = hades::unique_id{};
-
-	void on_create()
-	{
-		hades::game::set_system_data(quad_map{50});
-		return;
-	}
 
 	void on_connect()
 	{
@@ -79,15 +91,15 @@ namespace move
 		for (auto o : objs)
 		{
 			//we must get a value before we can set it
-			std::ignore = hades::game::level::get_value<collection_float>({ o, global::move_d });
+			std::ignore = hades::game::level::get_value<vec2_float>({ o, global::move_d });
 
 			//generate random move
-			auto move = collection_float{
+			auto move = vec2_float{
 				hades::random(-1.f, 1.f),
 				hades::random(-1.f, 1.f)
 			};
 
-			hades::game::level::set_value<collection_float>({ o, global::move_d }, std::move(move));
+			hades::game::level::set_value({ o, global::move_d }, std::move(move));
 
 			const auto rect = hades::world_rect_t{
 				hades::game::level::get_position(o),
@@ -99,16 +111,11 @@ namespace move
 			assert(hades::is_within(rect, world_bounds));
 
 			//add to quadmap
-			auto& map = hades::game::get_system_data<quad_map>();
+			auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
 
-			if (const auto collisions = map.find_collisions(rect);
-				!std::empty(collisions))
-			{
-				//TODO: destroy ent
-			}
+			//TODO: if any_of collide, then quick kill this ent
 
-			map.insert(rect, o);
-			hades::game::set_system_data(std::move(map));
+			map.value.insert(rect, o);
 		}
 		return;
 	}
@@ -117,12 +124,11 @@ namespace move
 	{
 		const auto& objs = hades::game::get_objects();
 
+		auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
+
 		for (auto o : objs)
-		{
-			auto& map = hades::game::get_system_data<quad_map>();
-			map.remove(o);
-			hades::game::set_system_data(std::move(map));
-		}
+			map.value.remove(o);
+		
 		return;
 	}
 
@@ -130,6 +136,9 @@ namespace move
 	{
 		const auto& objs = hades::game::get_objects();
 		const auto time = hades::game::get_time();
+
+		auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
+
 		//TODO: generate move vector
 		// try move
 		// update variables
@@ -137,14 +146,13 @@ namespace move
 		{
 			const auto pos = hades::game::level::get_position(o);
 			const auto siz = hades::game::level::get_size(o);
-			const auto move = hades::game::level::get_value<collection_float>({ o, global::move_d });
-			assert(std::size(move) == 2);
+			const auto move = hades::game::level::get_value<vec2_float>({ o, global::move_d });
 
 			const auto current_rect = hades::rect_float{ pos, siz };
 			const auto search_area = [&move, &current_rect]() {
 				auto centre_rect = hades::to_rect_centre(current_rect);
-				centre_rect.half_width += move[0];
-				centre_rect.half_width += move[1];
+				centre_rect.half_width += move.x;
+				centre_rect.half_height += move.y;
 				return hades::to_rect(centre_rect);
 			}();
 
@@ -159,7 +167,7 @@ namespace move
 			//	return r.rect;
 			//});
 
-			const auto full_move = hades::vector_float{ move[0], move[1] };
+			const auto full_move = move;
 			//const auto [final_move, iter] = hades::safe_move(current_rect,
 			//	full_move, std::begin(others), std::end(others));
 
@@ -197,8 +205,8 @@ void register_bounce_resources(hades::data::data_manager &data)
 	auto move_curve = data.find_or_create<curve>(global::move_d, hades::unique_id::zero);
 	move_curve->c_type = hades::curve_type::step;
 	//can be a vector, since we don't need to lerp this value
-	move_curve->data_type = curve_variable_type::collection_float;
-	move_curve->default_value = curve_types::collection_float{ 0.f, 0.f };
+	move_curve->data_type = curve_variable_type::vec2_float;
+	move_curve->default_value = curve_types::vec2_float{ 0.f, 0.f };
 
 	global::last_spawn_time_c = data.get_uid("last-spawn-time"sv);
 	auto last_spawn_curve = data.find_or_create<curve>(global::last_spawn_time_c, hades::unique_id::zero);
@@ -221,7 +229,7 @@ void register_bounce_systems(hades::data::data_manager &data)
 	);
 
 	hades::make_system("bounce-move",
-		move::on_create,
+		nullptr,
 		move::on_connect,
 		move::on_disconnect,
 		move::on_update,
