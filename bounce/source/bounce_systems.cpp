@@ -17,7 +17,7 @@ namespace global
 }
 
 static auto quad_map_id = hades::unique_id{};
-using quad_map_t = hades::quad_tree<hades::game::object_ref, hades::rect_t<float_t>>;
+using quad_map_t = hades::quad_tree<hades::game::object_ref, hades::rect_t<hades::float32>>;
 
 struct quad_map
 {
@@ -29,7 +29,7 @@ namespace spawn
 	void on_update()
 	{
 		//NOTE: object must have last_spawn_time curve
-		constexpr hades::time_duration spawn_delay = hades::nanoseconds{ 1 };
+		constexpr hades::time_duration spawn_delay = hades::seconds{ 2 };
 
 		const auto& objs = hades::game::get_objects();
 		const auto pos = hades::get_position_curve();
@@ -46,8 +46,8 @@ namespace spawn
 			if (spawn_time.first + spawn_delay > time)
 				continue;
 
-			if (spawn_time.second > 500)
-				continue;
+			/*if (spawn_time.second > 500)
+				continue;*/
 
 			const auto p = hades::game::level::get_position(o);
 			
@@ -87,6 +87,8 @@ namespace move
 	void on_connect()
 	{
 		const auto &objs = hades::game::get_objects();
+		const auto time = hades::game::get_time();
+		auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
 
 		for (auto o : objs)
 		{
@@ -110,10 +112,17 @@ namespace move
 			const auto world_bounds = hades::game::level::get_world_bounds();
 			assert(hades::is_within(rect, world_bounds));
 
-			//add to quadmap
-			auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
+			const auto rects = map.value.find_collisions(rect);
 
-			//TODO: if any_of collide, then quick kill this ent
+			//if any_of collide, then quick kill this ent
+			// this is a race condition, not sure how to fix this cleanly
+			if (std::any_of(std::begin(rects), std::end(rects), [rect](auto&& other) {
+				return hades::collision_test(rect, other.rect);
+			}))
+			{
+				hades::game::level::destroy_object(o, time);
+				continue;
+			}
 
 			map.value.insert(rect, o);
 		}
@@ -136,19 +145,25 @@ namespace move
 	{
 		const auto& objs = hades::game::get_objects();
 		const auto time = hades::game::get_time();
+		const auto dt = hades::game::get_delta_time();
 
 		auto& map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
 
-		//TODO: generate move vector
-		// try move
-		// update variables
+		const auto world = hades::game::level::get_world_bounds();
+		const auto world_edges = std::array{
+			hades::world_rect_t{world.x, world.y - world.height, world.width, world.height}, // top
+			hades::world_rect_t{world.x, world.y + world.height, world.width, world.height}, // bottom
+			hades::world_rect_t{world.x - world.width, world.y, world.width, world.height}, // left
+			hades::world_rect_t{world.x + world.width, world.y, world.width, world.height} // right
+		};
+
 		for (auto o : objs)
 		{
 			const auto pos = hades::game::level::get_position(o);
 			const auto siz = hades::game::level::get_size(o);
 			const auto move = hades::game::level::get_value<vec2_float>({ o, global::move_d });
 
-			const auto current_rect = hades::rect_float{ pos, siz };
+			auto current_rect = hades::rect_float{ pos, siz };
 			const auto search_area = [&move, &current_rect]() {
 				auto centre_rect = hades::to_rect_centre(current_rect);
 				centre_rect.half_width += move.x;
@@ -156,31 +171,77 @@ namespace move
 				return hades::to_rect(centre_rect);
 			}();
 
-			////get all nearby collision rects
-			//auto map = hades::game::get_system_value<quad_map>(quad_map_id);
-			//const auto other_rects = map.find_collisions(search_area);
-			//auto others = std::vector<hades::rect_float>{};
-			//others.reserve(std::size(other_rects));
+			//get all nearby collision rects
+			auto other_rects = map.value.find_collisions(search_area);
+			//remove ourselves from the list
+			const auto our_entry = std::find_if(std::begin(other_rects), std::end(other_rects), [o](const quad_map_t::value_type &other) {
+				return o == other.key;
+			});
 
-			//std::transform(std::cbegin(other_rects), std::cend(other_rects), 
-			//	std::back_inserter(others), [](auto &&r) {
-			//	return r.rect;
-			//});
+			//we're not in the collision map
+			//so just skip, no move
+			//we're probably a zombie object anyway
+			if (our_entry == std::end(other_rects))
+				continue;
+			
+			*our_entry = *std::rbegin(other_rects);
+			other_rects.pop_back();
+
+			auto others = std::vector<hades::rect_float>{};
+			others.reserve(std::size(other_rects) + std::size(world_edges));
+
+			//remove ids so we can pass to collision funcs
+			std::transform(std::cbegin(other_rects), std::cend(other_rects), 
+				std::back_inserter(others), [](auto &&r) {
+				return r.rect;
+			});
+
+			std::copy(std::begin(world_edges), std::end(world_edges), std::back_inserter(others));
 
 			const auto full_move = move;
-			//const auto [final_move, iter] = hades::safe_move(current_rect,
-			//	full_move, std::begin(others), std::end(others));
+			const auto [final_move, iter] = hades::safe_move(current_rect,
+				full_move, std::begin(others), std::end(others));
 
-			////TODO: handle collisions
-			//if (iter != std::end(others))
-			//{
-			//	//compare magnitudes and then perform the bounce
-			//}
+			if (iter != std::end(others))
+			{
+				//find out when we hit the object
+				const auto final_move_mag2 = hades::vector::magnitude_squared(final_move);
+				const auto move_mag2 = hades::vector::magnitude_squared(move);
+				const auto move_used = std::sqrt(final_move_mag2 / move_mag2);
+				const auto dt_val = static_cast<hades::float32>(dt.count());
+				const auto dt_remainder = dt_val * move_used;
+				const auto collision_time = hades::game::get_last_time() + 
+					hades::time_duration{ static_cast<hades::time_duration::rep>(dt_remainder) };
 
-			const auto [x, y] = pos + full_move;
-			hades::game::level::set_position(o, x, y, time);
+				//lay a keyframe at the collision position and point
+				const auto collision_pos = pos + final_move;
+				hades::game::level::set_position(o, collision_pos.x, collision_pos.y, collision_time);
 
-			//update collision box pos
+				//find out how much movement we have left
+				const auto remaining_move2 = move_mag2 * (1.f - move_used);
+				const auto reflection_move_mag = std::sqrt(remaining_move2);
+
+				//calculate the reflection movement vector
+				const auto collision_norm = hades::collision_normal(current_rect, move, *iter);
+				const auto reflection_vector = hades::vector::reflect(move, collision_norm);
+				hades::game::level::set_value({ o, global::move_d }, reflection_vector);
+				const auto reflect_move = hades::vector::resize(reflection_vector, reflection_move_mag);
+				
+				//lay a keyframe after the reflection movement
+				const auto [x, y] = collision_pos + reflect_move;
+				hades::game::level::set_position(o, x, y, time);
+				current_rect.x = x;
+				current_rect.y = y;
+			}
+			else
+			{
+				const auto [x, y] = pos + full_move;
+				hades::game::level::set_position(o, x, y, time);
+				current_rect.x = x;
+				current_rect.y = y;
+			}
+
+			map.value.insert(current_rect, o);
 		}
 		return;
 	}

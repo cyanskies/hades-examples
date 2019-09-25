@@ -14,8 +14,8 @@ animations:
     ball-anim:
         duration: 1
         texture: ball-texture
-        width: 90
-        height: 90
+        width: 10
+        height: 10
         frames:
             - [0, 0, 1.0]
 
@@ -29,6 +29,7 @@ objects:
         editor-icon: ball-anim
         editor-anim: ball-anim
         curves:
+            - alive
             - position
             - [size, [25.f, 25.f]]
             - move-dt
