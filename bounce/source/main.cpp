@@ -3,6 +3,7 @@
 #include "Hades/Main.hpp"
 #include "hades/mouse_input.hpp"
 
+#include "bounce_input.hpp"
 #include "bounce_state.hpp"
 #include "bounce_systems.hpp"
 
@@ -20,13 +21,14 @@ void resourceTypes(hades::data::data_system &data)
 {
 	register_bounce_resources(data);
 	register_bounce_systems(data);
-	hades::create_editor_console_variables();
+	hades::create_level_editor_console_vars();
 	hades::register_level_editor_resources(data);
 }
 
 void hadesMain(hades::StateManager &state, hades::input_system &bindings, hades::command_list &commandLine)
 {
 	hades::register_mouse_input(bindings);
+	register_bounce_input(bindings);
 
 	using bounce_editor = hades::basic_level_editor<
 		hades::level_editor_level_props,

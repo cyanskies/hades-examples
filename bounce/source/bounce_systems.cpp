@@ -5,6 +5,7 @@
 #include "hades/curve_extra.hpp"
 #include "hades/game_system.hpp"
 #include "hades/level_interface.hpp"
+#include "hades/level_scripts.hpp"
 #include "hades/quad_map.hpp"
 #include "Hades/rectangle_math.hpp"
 #include "hades/simple_resources.hpp"
@@ -23,6 +24,30 @@ struct quad_map
 {
 	quad_map_t value{ 50 };
 };
+
+static bool try_spawn_object(hades::world_vector_t p, const quad_map &q_map)
+{
+	//create new ball object at x, y
+	const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
+	auto ball = hades::make_instance(ball_type);
+	hades::set_position(ball, p);
+	const auto s = hades::get_size(ball);
+
+	//check for collision
+	const auto rect = hades::rect_float{ p, s };
+	const auto others = q_map.value.find_collisions(rect);
+
+	//if we collide, then skip
+	if (std::any_of(std::begin(others), std::end(others), [rect](auto&& o) {
+		return hades::collision_test(rect, o.rect);
+		}))
+	{
+		return false;
+	}
+
+	hades::game::level::create_object(std::move(ball));
+	return true;
+}
 
 namespace spawn
 {
@@ -50,28 +75,10 @@ namespace spawn
 				continue;*/
 
 			const auto p = hades::game::level::get_position(o);
-			
-			//create new ball object at x, y
-			const auto ball_type = hades::data::get<hades::resources::object>(global::ball_o);
-			auto ball = hades::make_instance(ball_type);
-			hades::set_position(ball, p);
-			const auto s = hades::get_size(ball);
-
-			//check for collision
-			const auto rect = hades::rect_float{ p, s };
-			const auto others = q_map.value.find_collisions(rect);
-			
-			//if we collide, then skip until next tick
-			if (std::any_of(std::begin(others), std::end(others), [rect](auto&& o) {
-				return hades::collision_test(rect, o.rect);
-			}))
-			{
-				continue;
-			}
 
 			//update the last spawn time
-			hades::game::level::set_value({ o, global::last_spawn_time_c }, time, spawn_time.second + 1);
-			hades::game::level::create_object(std::move(ball));
+			if(try_spawn_object(p, q_map))
+				hades::game::level::set_value({ o, global::last_spawn_time_c }, time, spawn_time.second + 1);
 		}
 
 		return;
@@ -253,6 +260,18 @@ namespace move
 	}
 }
 
+void bounce_input_fn(std::vector<hades::server_action> input)
+{
+	if(!std::empty(input))
+	{
+		const auto &q_map = hades::game::level::get_level_local_ref<quad_map>(quad_map_id);
+		//we have input, do something
+		try_spawn_object({ 288.f, 288.f }, q_map);
+	}
+
+	return;
+}
+
 void register_bounce_resources(hades::data::data_manager &data)
 {
 	hades::register_objects(data);
@@ -276,6 +295,8 @@ void register_bounce_resources(hades::data::data_manager &data)
 	last_spawn_curve->default_value = curve_types::int_t{};
 
 	global::ball_o = data.get_uid("ball"sv);
+
+	hades::resources::make_player_input_resource("input", bounce_input_fn, data);
 }
 
 void register_bounce_systems(hades::data::data_manager &data)

@@ -10,6 +10,8 @@
 #include "Hades/Server.hpp"
 #include "hades/time.hpp"
 
+#include "bounce_input.hpp"
+
 void bounce_state::init()
 {
 	const auto level_str = hades::files::as_string("bounce", "bounce.lvl");
@@ -27,8 +29,11 @@ bool bounce_state::handle_event(const hades::event &)
 	return false;
 }
 
-void bounce_state::update(hades::time_duration deltaTime, const sf::RenderTarget&, hades::input_system::action_set)
+void bounce_state::update(hades::time_duration deltaTime, const sf::RenderTarget&, hades::input_system::action_set actions)
 {
+	const auto spawn = actions.find(input::spawn_action);
+	if (spawn != std::end(actions) && spawn->active)
+		_level->send_request({ hades::server_action{} });
 	_server->update(deltaTime);
 }
 

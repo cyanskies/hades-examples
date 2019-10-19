@@ -4,6 +4,7 @@ level:
   name: Bounce example
   desc: Spawns balls to bounce around the scene
   next_id: -2147483646
+  player_input: input
   objects:
     -2147483646:
       type: spawner
