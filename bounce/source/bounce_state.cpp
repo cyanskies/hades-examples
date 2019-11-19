@@ -15,7 +15,7 @@
 void bounce_state::init()
 {
 	const auto level_str = hades::files::as_string("bounce", "bounce.lvl");
-	auto l = hades::deserialise(level_str);
+	auto l = hades::deserialise_level(level_str);
 	auto sv = hades::make_save_from_level(std::move(l));
 	_server = hades::create_server(std::move(sv));
 	_level = _server->connect_to_level(hades::unique_id::zero);

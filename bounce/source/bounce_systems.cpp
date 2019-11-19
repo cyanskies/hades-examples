@@ -18,7 +18,7 @@ namespace global
 }
 
 static auto quad_map_id = hades::unique_id{};
-using quad_map_t = hades::quad_tree<hades::game::object_ref, hades::rect_t<hades::float32>>;
+using quad_map_t = hades::quad_tree<hades::game::object_ref, hades::rect_t<float>>;
 
 struct quad_map
 {
@@ -215,7 +215,7 @@ namespace move
 				const auto final_move_mag2 = hades::vector::magnitude_squared(final_move);
 				const auto move_mag2 = hades::vector::magnitude_squared(move);
 				const auto move_used = std::sqrt(final_move_mag2 / move_mag2);
-				const auto dt_val = static_cast<hades::float32>(dt.count());
+				const auto dt_val = static_cast<float>(dt.count());
 				const auto dt_remainder = dt_val * move_used;
 				const auto collision_time = hades::game::get_last_time() + 
 					hades::time_duration{ static_cast<hades::time_duration::rep>(dt_remainder) };
